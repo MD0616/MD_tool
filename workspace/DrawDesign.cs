@@ -24,21 +24,21 @@ namespace MD_Explorer
 
         private Brush GetBrushForItem(string item)
         {
-            if (item.StartsWith("[Dir]: "))
+            if (item.StartsWith("[Dir ]: "))
             {
                 return Brushes.Red;
             }
             else if (item.StartsWith("[File]: "))
             {
-                return Brushes.Gray;
+                return Brushes.White;
             }
             else if (item.StartsWith("[Link]: "))
             {
-                return Brushes.Green;
+                return Brushes.YellowGreen;
             }
             else
             {
-                return Brushes.White;
+                return Brushes.Gray;
             }
         }
 

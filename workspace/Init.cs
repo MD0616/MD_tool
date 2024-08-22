@@ -76,7 +76,7 @@ namespace MD_Explorer
                 BackColor = Color.Black, // 背景色を黒に設定
                 ForeColor = Color.White, // 文字色を白に設定
                 BorderStyle = BorderStyle.FixedSingle, // 枠線スタイルを固定に設定
-                Font = new Font(myFont, 13), // 文字サイズを大きくする
+                Font = new Font(myFont, textSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
 
@@ -87,8 +87,8 @@ namespace MD_Explorer
                 BackColor = Color.Black, // 背景色を黒に設定
                 ForeColor = Color.White, // 文字色を白に設定
                 FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
-                Width = 80,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
             btnExecute.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
@@ -99,7 +99,7 @@ namespace MD_Explorer
             {
                 contextMenu.BackColor = Color.Black; // 背景色を黒に設定
                 contextMenu.ForeColor = Color.White; // 文字色を白に設定
-                contextMenu.Font = new Font(myFont, 13); // 文字サイズを大きくする
+                contextMenu.Font = new Font(myFont, textSizeFont); // 文字サイズを大きくする
 
                 // CSVファイルが存在する場合のみ処理を行う
                 if (File.Exists(csvPath))
@@ -146,7 +146,7 @@ namespace MD_Explorer
             // プルダウンメニューの初期化
             scriptComboBox = new ComboBox();
             {
-                if (Directory.Exists(csvPath))
+                if (Directory.Exists(myToolPath))
                 {
                     // 指定のフォルダのps1スクリプトをプルダウンで表示
                     var scripts = Directory.GetFiles(@myToolPath,"*.ps1");
@@ -163,7 +163,7 @@ namespace MD_Explorer
                 scriptComboBox.BackColor = Color.Black; // 背景色を黒に設定
                 scriptComboBox.ForeColor = Color.White; // 文字色を白に設定
                 scriptComboBox.Width = 250;
-                scriptComboBox.Font = new Font(myFont, 13); // 文字サイズを大きくする
+                scriptComboBox.Font = new Font(myFont, textSizeFont); // 文字サイズを大きくする
                 scriptComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; // ウィンドウのサイズに合わせて伸縮
             };
 
@@ -174,12 +174,28 @@ namespace MD_Explorer
                 BackColor = Color.Black, // 背景色を黒に設定
                 ForeColor = Color.White, // 文字色を白に設定
                 FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
-                Width = 80,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
             btnShortcut.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
             btnShortcut.Click += new EventHandler(btnShortcut_Click);
+
+            // リネームボタンの初期化
+            btnRename = new Button
+            {
+                Text = "リネーム",
+                BackColor = Color.Black, // 背景色を黒に設定
+                ForeColor = Color.White, // 文字色を白に設定
+                FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
+                Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
+            };
+            btnRename.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
+            btnRename.Click += new EventHandler(btnRename_Click);
 
             // 削除ボタンの初期化
             btnDelete = new Button
@@ -188,8 +204,9 @@ namespace MD_Explorer
                 BackColor = Color.Black, // 背景色を黒に設定
                 ForeColor = Color.White, // 文字色を白に設定
                 FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
-                Width = 80,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
             btnDelete.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
@@ -202,8 +219,9 @@ namespace MD_Explorer
                 BackColor = Color.Black, // 背景色を黒に設定
                 ForeColor = Color.White, // 文字色を白に設定
                 FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
-                Width = 80,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
             btnSearch.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
@@ -216,9 +234,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnHome.FlatAppearance.BorderColor = Color.Gray;
@@ -231,9 +249,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnRefresh.FlatAppearance.BorderColor = Color.Gray;
@@ -246,9 +264,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top| AnchorStyles.Left
             };
             btnVSCode.FlatAppearance.BorderColor = Color.Gray;
@@ -261,9 +279,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top| AnchorStyles.Left
             };
             btnExplorer.FlatAppearance.BorderColor = Color.Gray;
@@ -276,9 +294,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8), // 文字サイズを大きくする
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top| AnchorStyles.Left
             };
             btnTerminal.FlatAppearance.BorderColor = Color.Gray;
@@ -290,7 +308,7 @@ namespace MD_Explorer
                 BackColor = Color.Black, // 背景色を黒に設定
                 ForeColor = Color.White, // 文字色を白に設定
                 Size = new Size(700, 400), // サイズを指定
-                Font = new Font(myFont, 11), // 文字サイズを大きくする
+                Font = new Font(myFont, tabSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
                 DrawMode = TabDrawMode.OwnerDrawFixed, // タブの描画モードを設定
                 Padding = new Point(10, 3), // タブの幅を設定
@@ -306,9 +324,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8),
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnCopyPath.FlatAppearance.BorderColor = Color.Gray;
@@ -321,9 +339,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8),
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnCopyName.FlatAppearance.BorderColor = Color.Gray;
@@ -336,9 +354,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8),
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnCopyFullPath.FlatAppearance.BorderColor = Color.Gray;
@@ -351,9 +369,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8),
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnNewFile.FlatAppearance.BorderColor = Color.Gray;
@@ -366,9 +384,9 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Width = 80,
-                Height = 25,
-                Font = new Font(myFont, 8),
+                Width = btnSizeWidth,
+                Height = btnSizeHeight,
+                Font = new Font(myFont, btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             btnNewFolder.FlatAppearance.BorderColor = Color.Gray;
@@ -426,6 +444,7 @@ namespace MD_Explorer
             bottomPanel.Controls.Add(btnTerminal);
             bottomPanel.Controls.Add(btnNewFile);
             bottomPanel.Controls.Add(btnNewFolder);
+            bottomPanel.Controls.Add(btnRename);
             bottomPanel.Controls.Add(btnDelete);
             bottomPanel.Controls.Add(btnShortcut);
 

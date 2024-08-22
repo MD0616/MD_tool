@@ -17,6 +17,12 @@ namespace MD_Explorer
         private string csvPath = "D:\\workspace\\aaa.csv"; // ショートカットの記載パス
         private string myToolPath = "D:\\workspace\\sss";
         private string myFont = "瀬戸フォント";
+        private string fileOpenExe = "code";
+        private int btnSizeWidth = 80;
+        private int btnSizeHeight = 25;
+        private int btnSizeFont = 8;
+        private int tabSizeFont = 13;
+        private int textSizeFont = 13;
         private TextBox txtSearchBar; // 検索バーを表すテキストボックス
         private Button btnSearch; // 検索を開始するボタン
         private TabControl tabControl1; // タブを管理するコントロール
@@ -29,6 +35,7 @@ namespace MD_Explorer
         private Button btnCopyName; // 選択したファイル/ディレクトリの名前をコピーするボタン
         private Button btnShortcut;
         private Button btnDelete;
+        private Button btnRename;
         private Button btnCopyFullPath; // 選択したファイル/ディレクトリのフルパスをコピーするボタン
         private Button btnNewFile; // 新しいファイルを作成するボタン
         private Button btnNewFolder; // 新しいフォルダを作成するボタン

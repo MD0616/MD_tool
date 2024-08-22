@@ -125,9 +125,49 @@ namespace MD_Explorer
                             Directory.Delete(fullPath, true);
                         }
                     }
+                    // リストを更新する。
+                    RefreshActiveTab();
                 }
             }
+        }
 
+        // リネームボタンがクリックされたときのイベントハンドラを追加
+        private void btnRename_Click(object sender, EventArgs e)
+        {
+            // 現在選択されているタブがある場合、そのタブの現在選択されているアイテムの名前を取得します。
+            if (tabControl1.SelectedTab != null)
+            {
+                TabPage activeTab = tabControl1.SelectedTab;
+                ListBox listBox = (ListBox)activeTab.Controls[0];
+                if (listBox.SelectedItem != null)
+                {
+                    string path = listBox.Tag.ToString();
+                    string selectedItem = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
+                    string fullPath = Path.Combine(path, itemName);
+
+                    // 新しい名前を入力するためのダイアログを表示
+                    string newFileName= Prompt.ShowDialog(string.Format("変更前'{0}'\n新しい名前を記載してください",itemName), "リネーム");
+
+                    if (!string.IsNullOrEmpty(newFileName))
+                    {
+                        string newPath = Path.Combine(path, newFileName);
+
+                        // ファイルまたはディレクトリの名前を変更
+                        if (File.Exists(fullPath))
+                        {
+                            File.Move(fullPath, newPath);
+                        }
+                        else if (Directory.Exists(fullPath))
+                        {
+                            Directory.Move(fullPath, newPath);
+                        }
+
+                        // リストを更新する。
+                        RefreshActiveTab();
+                    }
+                }
+            }
         }
 
         private void btnSearch_Click(object sender, MouseEventArgs e)
@@ -160,9 +200,18 @@ namespace MD_Explorer
             }
             else if (File.Exists(path))
             {
-                // ファイルが存在する場合、そのファイルを開く
-                Process.Start(path);
-                txtSearchBar.Text = string.Empty;
+                try
+                {
+                    // ファイルが存在する場合、そのファイルを開く
+                    Process.Start(path);
+                    txtSearchBar.Text = string.Empty;
+                }
+                catch (System.ComponentModel.Win32Exception)
+                {
+                    // 関連付けられたアプリケーションが存在しない場合、codeで開く。
+                    Process.Start(fileOpenExe, path);
+                    txtSearchBar.Text = string.Empty;
+                }
             }
             else
             {
@@ -421,7 +470,7 @@ namespace MD_Explorer
             {
                 DirectoryInfo info = new DirectoryInfo(dir);
                 string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
-                listBox.Items.Add(string.Format("[Dir]: {0,-40} サイズ: -            更新日時: {1}", Path.GetFileName(dir), lastModified));
+                listBox.Items.Add(FormatString("Dir ", Path.GetFileName(dir), "-", lastModified));
             }
             foreach (string file in Directory.GetFiles(path))
             {
@@ -430,12 +479,12 @@ namespace MD_Explorer
                     FileInfo info = new FileInfo(file);
                     string size = (info.Length / 1024).ToString() + " KB";
                     string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
-                    listBox.Items.Add(string.Format("[File]: {0,-39} サイズ: {1,-12} 更新日時: {2}", Path.GetFileName(file), size, lastModified));
+                    listBox.Items.Add(FormatString("File", Path.GetFileName(file), size, lastModified));
                 }
             }
             foreach (string link in Directory.GetFiles(path, "*.lnk"))
             {
-                listBox.Items.Add(string.Format("[Link]: {0,-32} サイズ: {1,-12} 更新日時: {2}", Path.GetFileName(link), "-", "-"));
+                listBox.Items.Add(FormatString("Link", Path.GetFileName(link), "-", "-"));
             }
 
             // ネットワークのインデックスを再計算し、タブのTagプロパティに保存
@@ -449,6 +498,18 @@ namespace MD_Explorer
             tabPage.Text = new DirectoryInfo(path).Name;
             listBox.Tag = path;
         }
+
+        private string FormatString(string type, string name, string size, string lastModified)
+        {
+            int nameLength = Encoding.GetEncoding("Shift_JIS").GetByteCount(name);
+            int padding = 40 - nameLength;
+            if (padding < 0) // itemNameの長さが40を超えている場合
+            {
+                padding = 0; // paddingを0に設定
+            }
+            return string.Format("[{0}]: {1}{2} サイズ: {3,-12} 更新日時: {4}", type, name, new string(' ', padding), size, lastModified);
+        }
+
 
         public void OpenNewTab(string path)
         {
@@ -482,6 +543,40 @@ namespace MD_Explorer
             tabControl1.TabPages.Add(tabPage);
         }
 
+        private void HandleKeyDown(object sender, KeyEventArgs e)
+        {
+            ListBox listBox = (ListBox)sender;
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.K)
+            {
+                // 上矢印キーが押されたときの処理
+                if (listBox.SelectedIndex > 0)
+                {
+                    listBox.SelectedIndex--;
+                }
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down || e.KeyCode == Keys.J)
+            {
+                // 下矢印キーが押されたときの処理
+                if (listBox.SelectedIndex < listBox.Items.Count - 1)
+                {
+                    listBox.SelectedIndex++;
+                }
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Enter)
+            {
+                // Enterキーが押されたときの処理
+                if (listBox.SelectedItem != null)
+                {
+                    string selectedPath = listBox.SelectedItem.ToString();
+                    string path = listBox.Tag.ToString();
+                    TabPage tabPage = (TabPage)listBox.Parent;
+                    HandleDoubleClick(selectedPath, path, listBox, tabPage);
+                }
+            }
+        }
+
         private ListBox CreateListBox(string path, TabPage tabPage)
         {
             // このメソッドは、新しいリストボックスを作成します。
@@ -502,7 +597,7 @@ namespace MD_Explorer
             listBox.DrawItem += listBox_DrawItem;
             listBox.MouseDoubleClick += listBox_MouseDoubleClick;
             listBox.MouseDown += listBox_MouseDown;
-
+            listBox.KeyDown += HandleKeyDown;
             UpdateListBox(listBox, path, tabPage);
 
             return listBox;
@@ -540,8 +635,11 @@ namespace MD_Explorer
                 string[] parts = selectedPath.Split(new[] { ": " }, StringSplitOptions.None);
                 if (parts.Length > 1)
                 {
-                    string itemName = parts[1].Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
-                    selectedPath = Path.Combine(path, parts[1].Split(new[] { "  " }, StringSplitOptions.None)[0]); // フルパスを取得
+                    // アイテム名のみを取得
+                    string itemName = parts[1].Split(new[] { " サイズ: " }, StringSplitOptions.None)[0];
+                    itemName = itemName.Replace(" サイズ", "").TrimEnd();
+                    // フルパスを取得
+                    selectedPath = Path.Combine(path, itemName);
                     if (Directory.Exists(selectedPath))
                     {
                         UpdateListBox(listBox, selectedPath, tabPage);
@@ -566,13 +664,21 @@ namespace MD_Explorer
                         }
                         else if (File.Exists(targetPath))
                         {
-                            // リンク先がファイルの場合、そのファイルを開く
-                            Process.Start(targetPath);
+                            try
+                            {
+                                // リンク先がファイルの場合、そのファイルを開く
+                                Process.Start(targetPath);
+                            }
+                            catch (System.ComponentModel.Win32Exception)
+                            {
+                                // 関連付けられたアプリケーションが存在しない場合、codeで開く。
+                                Process.Start(fileOpenExe, targetPath);
+                            }
                         }
                     }
                     else
                     {
-                        Process.Start("code", selectedPath);
+                        Process.Start(selectedPath);
                     }
                 }
             }
@@ -605,39 +711,50 @@ namespace MD_Explorer
                     string[] parts = selectedPath.Split(new[] { ": " }, StringSplitOptions.None);
                     if (parts.Length > 1)
                     {
-                    string itemName = parts[1].Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
-                    selectedPath = Path.Combine(path, parts[1].Split(new[] { "  " }, StringSplitOptions.None)[0]); // フルパスを取得
-                    if (Directory.Exists(selectedPath))
-                    {
-                        OpenNewTab(selectedPath);
-                    }
-                    else if (selectedPath.EndsWith(".lnk"))
-                    {
-                        // PowerShellを使用してショートカットのリンク先を取得
-                        var psi = new ProcessStartInfo();
-                        psi.FileName = "powershell";
-                        psi.UseShellExecute = false;
-                        psi.RedirectStandardOutput = true;
-                        psi.Arguments = string.Format("-Command \"$sh = New-Object -COM WScript.Shell; $sc = $sh.CreateShortcut('{0}'); $sc.TargetPath\"", selectedPath);
-                        var process = Process.Start(psi);
-                        var output = process.StandardOutput.ReadToEnd();
-                        process.WaitForExit();
+                        // アイテム名のみを取得
+                        string itemName = parts[1].Split(new[] { " サイズ: " }, StringSplitOptions.None)[0];
+                        itemName = itemName.Replace(" サイズ", "").TrimEnd();
+                        // フルパスを取得
+                        selectedPath = Path.Combine(path, itemName);
+                        if (Directory.Exists(selectedPath))
+                        {
+                            OpenNewTab(selectedPath);
+                        }
+                        else if (selectedPath.EndsWith(".lnk"))
+                        {
+                            // PowerShellを使用してショートカットのリンク先を取得
+                            var psi = new ProcessStartInfo();
+                            psi.FileName = "powershell";
+                            psi.UseShellExecute = false;
+                            psi.RedirectStandardOutput = true;
+                            psi.Arguments = string.Format("-Command \"$sh = New-Object -COM WScript.Shell; $sc = $sh.CreateShortcut('{0}'); $sc.TargetPath\"", selectedPath);
+                            var process = Process.Start(psi);
+                            var output = process.StandardOutput.ReadToEnd();
+                            process.WaitForExit();
 
-                        string targetPath = output.Trim();
-                        if (Directory.Exists(targetPath))
-                        {
-                            // リンク先がディレクトリの場合、そのディレクトリを開く
-                            OpenNewTab(targetPath);
+                            string targetPath = output.Trim();
+                            if (Directory.Exists(targetPath))
+                            {
+                                // リンク先がディレクトリの場合、そのディレクトリを開く
+                                OpenNewTab(targetPath);
+                            }
+                            else if (File.Exists(targetPath))
+                            {
+                                try
+                                {
+                                    // リンク先がファイルの場合、そのファイルを開く
+                                    Process.Start(targetPath);
+                                }
+                                catch (System.ComponentModel.Win32Exception)
+                                {
+                                    // 関連付けられたアプリケーションが存在しない場合、codeで開く。
+                                    Process.Start(fileOpenExe, targetPath);
+                                }
+                            }
                         }
-                        else if (File.Exists(targetPath))
-                        {
-                            // リンク先がファイルの場合、そのファイルを開く
-                            Process.Start(targetPath);
-                        }
-                    }
                         else
                         {
-                            Process.Start("code", selectedPath);
+                            Process.Start(selectedPath);
                         }
                     }
                 }
