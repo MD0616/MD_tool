@@ -62,9 +62,9 @@ namespace MD_Explorer
             Font boldFont = new Font(e.Font, FontStyle.Bold);
 
             // タブの閉じるボタンの表示領域
-            int closeButtonWidth = 12;
+            int closeButtonWidth = 15;
             int closeButtonHeight = 12;
-            int closeButtonMargin = 5; // タブ名と閉じるボタンの間のマージン
+            int closeButtonMargin = 10; // タブ名と閉じるボタンの間のマージン
             int closeButtonX = e.Bounds.Right - closeButtonWidth - closeButtonMargin;
             if (closeButtonX < e.Bounds.Left + textSize.Width + closeButtonMargin)
             {
@@ -90,5 +90,25 @@ namespace MD_Explorer
                 }
             }
         }
+    }
+}
+
+public class MyRenderer : ToolStripProfessionalRenderer
+{
+    protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+    {
+        if (!e.Item.Selected)
+            base.OnRenderMenuItemBackground(e);
+        else
+        {
+            Rectangle rc = new Rectangle(Point.Empty, e.Item.Size);
+            e.Graphics.FillRectangle(Brushes.DarkGray, rc);
+        }
+    }
+
+    protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
+    {
+        // ここでマージンの背景色を描画します。
+        e.Graphics.FillRectangle(Brushes.Black, e.AffectedBounds);
     }
 }

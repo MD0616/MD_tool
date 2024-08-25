@@ -17,7 +17,7 @@ namespace MD_Explorer
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "powershell.exe",
-                    Arguments = "-NoExit -Command \"& {Write-Host 'PowerShell Ready'; }\"",
+                    Arguments = "-NoExit -Command \"& {Write-Host 'PowerShell Ready'; pwd;}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardInput = true,
                     UseShellExecute = false,
@@ -115,33 +115,65 @@ namespace MD_Explorer
 
                             // 値を取得
                             string displayName = values[0];
-                            string className = values[1];
-                            string fullPath = values[2];
+                            string fullPath = values[1];
 
                             // メニューアイテムの作成
-                            ToolStripMenuItem menuItem = new ToolStripMenuItem(displayName);
-                            menuItem.Tag = fullPath; // フルパスをTagプロパティに保存
-                            menuItem.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                            menuItem.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                            ToolStripMenuItem menuItem1 = new ToolStripMenuItem(displayName);
+                            menuItem1.Tag = fullPath; // フルパスをTagプロパティに保存
+                            menuItem1.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
+                            menuItem1.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
 
-                            // クラス名がある場合は、その下の階層のコンテキストメニューを作成
-                            if (!string.IsNullOrEmpty(className))
-                            {
-                                ToolStripMenuItem subMenuItem = new ToolStripMenuItem(className);
-                                subMenuItem.DropDownItems.Add(menuItem);
-                                subMenuItem.BackColor = Color.Black; // サブメニューアイテムの背景色を黒に設定
-                                subMenuItem.ForeColor = Color.White; // サブメニューアイテムの文字色を白に設定
-                                contextMenu.Items.Add(subMenuItem);
-                            }
-                            else
-                            {
-                                contextMenu.Items.Add(menuItem);
-                            }
+                            contextMenu.Items.Add(menuItem1);
                         }
                     }
                 }
             };
             contextMenu.MouseClick += new MouseEventHandler(contextMenuShortcut_Click);
+
+            // 新しいコンテキストメニューの初期化
+            dropDownMenu = new ContextMenuStrip();
+            {
+                dropDownMenu.BackColor = Color.Black; // 背景色を黒に設定
+                dropDownMenu.ForeColor = Color.White; // 文字色を白に設定
+                dropDownMenu.Font = new Font(myFont, textSizeFont); // 文字サイズを大きくする
+                dropDownMenu.Renderer = new MyRenderer();
+
+                // アイテムの作成
+                ToolStripMenuItem menuItemRename = new ToolStripMenuItem("リネーム");
+                menuItemRename.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
+                menuItemRename.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemRename.Click += btnRename_Click;
+
+                ToolStripMenuItem menuItemDelete = new ToolStripMenuItem("削除");
+                menuItemDelete.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
+                menuItemDelete.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemDelete.Click += btnDelete_Click;
+
+                ToolStripMenuItem menuItemGetFileName = new ToolStripMenuItem("ファイル名取得");
+                menuItemGetFileName.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
+                menuItemGetFileName.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemGetFileName.Click += btnCopyName_Click;
+
+                ToolStripMenuItem menuItemGetPath = new ToolStripMenuItem("パス取得");
+                menuItemGetPath.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
+                menuItemGetPath.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemGetPath.Click += btnCopyFullPath_Click;
+
+                ToolStripMenuItem menuItemOpenVScode = new ToolStripMenuItem("VScodeで開く");
+                menuItemOpenVScode.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
+                menuItemOpenVScode.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemOpenVScode.Click += btnVSCode_Click;
+
+                // アイテムをコンテキストメニューに追加
+                dropDownMenu.Items.Add(menuItemRename);
+                dropDownMenu.Items.Add(menuItemDelete);
+                dropDownMenu.Items.Add(menuItemGetFileName);
+                dropDownMenu.Items.Add(menuItemGetPath);
+                dropDownMenu.Items.Add(menuItemOpenVScode);
+
+                // KeyDownイベントハンドラを設定
+                dropDownMenu.KeyDown += dropDownMenu_KeyDown;
+            };
 
             // プルダウンメニューの初期化
             scriptComboBox = new ComboBox();
@@ -181,36 +213,6 @@ namespace MD_Explorer
             };
             btnShortcut.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
             btnShortcut.Click += new EventHandler(btnShortcut_Click);
-
-            // リネームボタンの初期化
-            btnRename = new Button
-            {
-                Text = "リネーム",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
-                FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
-                Width = btnSizeWidth,
-                Height = btnSizeHeight,
-                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
-                Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
-            };
-            btnRename.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
-            btnRename.Click += new EventHandler(btnRename_Click);
-
-            // 削除ボタンの初期化
-            btnDelete = new Button
-            {
-                Text = "削除",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
-                FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
-                Width = btnSizeWidth,
-                Height = btnSizeHeight,
-                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
-                Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
-            };
-            btnDelete.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
-            btnDelete.Click += new EventHandler(btnDelete_Click);
 
             // 決定ボタンの初期化
             btnSearch = new Button
@@ -257,21 +259,6 @@ namespace MD_Explorer
             btnRefresh.FlatAppearance.BorderColor = Color.Gray;
             btnRefresh.Click += new EventHandler(btnRefresh_Click);
 
-            // VScodeボタンの初期化
-            btnVSCode = new Button
-            {
-                Text = "VSCode",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Width = btnSizeWidth,
-                Height = btnSizeHeight,
-                Font = new Font(myFont, btnSizeFont), // 文字サイズを大きくする
-                Anchor = AnchorStyles.Top| AnchorStyles.Left
-            };
-            btnVSCode.FlatAppearance.BorderColor = Color.Gray;
-            btnVSCode.Click += new EventHandler(btnVSCode_Click);
-
             // エクスプローラボタンの初期化
             btnExplorer = new Button
             {
@@ -311,7 +298,7 @@ namespace MD_Explorer
                 Font = new Font(myFont, tabSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
                 DrawMode = TabDrawMode.OwnerDrawFixed, // タブの描画モードを設定
-                Padding = new Point(10, 3), // タブの幅を設定
+                Padding = new Point(15, 3), // タブの幅を設定
             };
             // イベントハンドラの設定
             tabControl1.DrawItem += new DrawItemEventHandler(tabControl1_DrawItem);
@@ -331,36 +318,6 @@ namespace MD_Explorer
             };
             btnCopyPath.FlatAppearance.BorderColor = Color.Gray;
             btnCopyPath.Click += new EventHandler(btnCopyPath_Click);
-
-            // 選択中のリストのファイル、フォルダ名をクリップボードに追加するボタン
-            btnCopyName = new Button
-            {
-                Text = "ファイル名",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Width = btnSizeWidth,
-                Height = btnSizeHeight,
-                Font = new Font(myFont, btnSizeFont),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left
-            };
-            btnCopyName.FlatAppearance.BorderColor = Color.Gray;
-            btnCopyName.Click += new EventHandler(btnCopyName_Click);
-
-            // 選択中のリストのフルパスをクリップボードに追加するボタン
-            btnCopyFullPath = new Button
-            {
-                Text = "フルパス",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Width = btnSizeWidth,
-                Height = btnSizeHeight,
-                Font = new Font(myFont, btnSizeFont),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left
-            };
-            btnCopyFullPath.FlatAppearance.BorderColor = Color.Gray;
-            btnCopyFullPath.Click += new EventHandler(btnCopyFullPath_Click);
 
             // 新規ファイルを作成するボタン
             btnNewFile = new Button
@@ -433,19 +390,14 @@ namespace MD_Explorer
             topPanel.Controls.Add(btnHome);
             topPanel.Controls.Add(btnRefresh);
             topPanel.Controls.Add(btnCopyPath);
-            topPanel.Controls.Add(btnCopyName);
-            topPanel.Controls.Add(btnCopyFullPath);
             topPanel.Controls.Add(scriptComboBox);
             topPanel.Controls.Add(btnExecute);
 
             // ボタンをFlowLayoutPanelに追加
-            bottomPanel.Controls.Add(btnVSCode);
             bottomPanel.Controls.Add(btnExplorer);
             bottomPanel.Controls.Add(btnTerminal);
             bottomPanel.Controls.Add(btnNewFile);
             bottomPanel.Controls.Add(btnNewFolder);
-            bottomPanel.Controls.Add(btnRename);
-            bottomPanel.Controls.Add(btnDelete);
             bottomPanel.Controls.Add(btnShortcut);
 
             // 検索バーと決定ボタンをTableLayoutPanelに追加

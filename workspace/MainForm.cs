@@ -28,15 +28,10 @@ namespace MD_Explorer
         private TabControl tabControl1; // タブを管理するコントロール
         private Button btnHome; // ホームディレクトリに移動するボタン
         private Button btnRefresh; // ディレクトリの表示を更新するボタン
-        private Button btnVSCode; // Visual Studio Codeを開くボタン
         private Button btnExplorer; // ファイルエクスプローラを開くボタン
         private Button btnTerminal; // ターミナルを開くボタン
         private Button btnCopyPath; // 現在のパスをコピーするボタン
-        private Button btnCopyName; // 選択したファイル/ディレクトリの名前をコピーするボタン
         private Button btnShortcut;
-        private Button btnDelete;
-        private Button btnRename;
-        private Button btnCopyFullPath; // 選択したファイル/ディレクトリのフルパスをコピーするボタン
         private Button btnNewFile; // 新しいファイルを作成するボタン
         private Button btnNewFolder; // 新しいフォルダを作成するボタン
         private TextBox txtPowerShellOutput; // PowerShellの出力を表示するテキストボックス
@@ -45,6 +40,8 @@ namespace MD_Explorer
         private Button btnExecute;
         private ComboBox scriptComboBox;
         private ContextMenuStrip contextMenu;
+        private ContextMenuStrip dropDownMenu;
+
         // MainFormクラスのコンストラクタ。オブジェクトが生成されるときに呼び出されます。
         public MainForm() 
         {

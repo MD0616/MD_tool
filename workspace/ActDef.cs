@@ -6,6 +6,8 @@ using System.IO;
 using System.Management.Automation;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace MD_Explorer
 {
@@ -32,26 +34,95 @@ namespace MD_Explorer
             }
         }
 
-    private void contextMenuShortcut_Click(object sender, MouseEventArgs e)
-    {
-        var contextMenu = (ContextMenuStrip)sender;
-        var menuItem = (ToolStripMenuItem)contextMenu.Items[0]; // 選択されたメニューアイテムを取得
-        var fullPath = menuItem.Tag.ToString();
-        if (e.Button == MouseButtons.Left) // シングルクリック
+        private void dropDownMenu_Opening(object sender, CancelEventArgs e)
         {
-            if (Directory.Exists(fullPath))
+            // コンテキストメニューが開かれたとき、フォーカスを設定します。
+            dropDownMenu.Focus();
+        }
+
+        private void dropDownMenu_KeyDown(object sender, KeyEventArgs e)
+        {
+            var dropDownMenu = (ToolStripDropDown)sender;
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.K)
             {
-                UpdateActiveTab(fullPath);
+                // 上矢印キーが押されたときの処理
+                // 選択を一つ上の項目に移動します。
+                MoveSelection(dropDownMenu, -1);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down || e.KeyCode == Keys.J)
+            {
+                // 下矢印キーが押されたときの処理
+                // 選択を一つ下の項目に移動します。
+                MoveSelection(dropDownMenu, 1);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.H)
+            {
+                // Hキーが押されたときの処理
+                // ドロップダウンメニューを閉じます。
+                dropDownMenu.Close();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Enter)
+            {
+                // Enterキーが押されたときの処理
+                // 現在選択されている項目をクリックします。
+                PerformClickOnSelectedItem(dropDownMenu);
+                e.Handled = true;
             }
         }
-        else if (e.Button == MouseButtons.Middle) // ホイールクリック
+
+        private void MoveSelection(ToolStripDropDown menu, int direction)
         {
-            if (Directory.Exists(fullPath))
+            int maxIndex = menu.Items.Count - 1;
+            for (int i = 0; i <= maxIndex; i++)
             {
-                OpenNewTab(fullPath);
+                if (menu.Items[i].Selected)
+                {
+                    int newIndex = i + direction;
+                    if (newIndex < 0) newIndex = 0;
+                    if (newIndex > maxIndex) newIndex = maxIndex;
+                    menu.Items[newIndex].Select();
+                    break;
+                }
             }
         }
-    }
+
+        private void PerformClickOnSelectedItem(ToolStripDropDown menu)
+        {
+            foreach (ToolStripItem item in menu.Items)
+            {
+                if (item.Selected && item.Enabled)
+                {
+                    ((ToolStripMenuItem)item).PerformClick();
+                    break;
+                }
+            }
+        }
+
+        private void contextMenuShortcut_Click(object sender, MouseEventArgs e)
+        {
+            var menuItem = contextMenu.GetItemAt(e.Location) as ToolStripMenuItem; // クリックされたメニューアイテムを取得
+            if (menuItem != null)
+            {
+                var fullPath = menuItem.Tag.ToString();
+                if (e.Button == MouseButtons.Left) // シングルクリック
+                {
+                    if (Directory.Exists(fullPath))
+                    {
+                        UpdateActiveTab(fullPath);
+                    }
+                }
+                else if (e.Button == MouseButtons.Middle) // ホイールクリック
+                {
+                    if (Directory.Exists(fullPath))
+                    {
+                        OpenNewTab(fullPath);
+                    }
+                }
+            }
+        }
 
         // ショートカットボタンの位置にコンテキストメニューを表示
         private void btnShortcut_Click(object sender, EventArgs e)
@@ -105,10 +176,11 @@ namespace MD_Explorer
             {
                 TabPage activeTab = tabControl1.SelectedTab;
                 ListBox listBox = (ListBox)activeTab.Controls[0];
-                if (listBox.SelectedItem != null)
+                List<string> itemNames = new List<string>();
+                for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
                 {
                     string path = listBox.Tag.ToString();
-                    string selectedItem = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string selectedItem = listBox.SelectedItems[i].ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
                     string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
                     string fullPath = Path.Combine(path, itemName);
                     // 削除確認ダイアログを表示
@@ -125,13 +197,12 @@ namespace MD_Explorer
                             Directory.Delete(fullPath, true);
                         }
                     }
-                    // リストを更新する。
-                    RefreshActiveTab();
                 }
             }
+            // リストを更新する。
+            RefreshActiveTab();
         }
 
-        // リネームボタンがクリックされたときのイベントハンドラを追加
         private void btnRename_Click(object sender, EventArgs e)
         {
             // 現在選択されているタブがある場合、そのタブの現在選択されているアイテムの名前を取得します。
@@ -139,10 +210,10 @@ namespace MD_Explorer
             {
                 TabPage activeTab = tabControl1.SelectedTab;
                 ListBox listBox = (ListBox)activeTab.Controls[0];
-                if (listBox.SelectedItem != null)
+                for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
                 {
                     string path = listBox.Tag.ToString();
-                    string selectedItem = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string selectedItem = listBox.SelectedItems[i].ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
                     string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
                     string fullPath = Path.Combine(path, itemName);
 
@@ -162,11 +233,10 @@ namespace MD_Explorer
                         {
                             Directory.Move(fullPath, newPath);
                         }
-
-                        // リストを更新する。
-                        RefreshActiveTab();
                     }
                 }
+                // リストを更新する。
+                RefreshActiveTab();
             }
         }
 
@@ -296,12 +366,14 @@ namespace MD_Explorer
             {
                 TabPage activeTab = tabControl1.SelectedTab;
                 ListBox listBox = (ListBox)activeTab.Controls[0];
-                if (listBox.SelectedItem != null)
+                List<string> itemNames = new List<string>();
+                foreach (var item in listBox.SelectedItems)
                 {
-                    string selectedItem = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string selectedItem = item.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
                     string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
-                    Clipboard.SetText(itemName); // クリップボードにコピー
+                    itemNames.Add(itemName);
                 }
+                Clipboard.SetText(string.Join(Environment.NewLine, itemNames)); // クリップボードにコピー
             }
         }
 
@@ -313,14 +385,16 @@ namespace MD_Explorer
             {
                 TabPage activeTab = tabControl1.SelectedTab;
                 ListBox listBox = (ListBox)activeTab.Controls[0];
-                if (listBox.SelectedItem != null)
+                List<string> fullPaths = new List<string>();
+                for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
                 {
                     string path = listBox.Tag.ToString();
-                    string selectedItem = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string selectedItem = listBox.SelectedItems[i].ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
                     string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
                     string fullPath = Path.Combine(path, itemName);
-                    Clipboard.SetText(fullPath); // クリップボードにコピー
+                    fullPaths.Add(fullPath);
                 }
+                Clipboard.SetText(string.Join(Environment.NewLine, fullPaths)); // クリップボードにコピー
             }
         }
 
@@ -374,9 +448,19 @@ namespace MD_Explorer
             // その後、テキストボックスの内容をクリアします。
             if (e.KeyCode == Keys.Enter)
             {
-                string input = txtPowerShellInput.Text;
+                string input = txtPowerShellInput.Text.Trim();
+                if (input.ToLower() == "home")
+                {
+                    // 「home」が入力されたときにディレクトリを変更する
+                    string home = GetCurrentTabDirectory();
+                    powerShellProcess.StandardInput.WriteLine("cd " + home + ";Write-Host pwd " + home ); 
+                }
+                else
+                {
+                    // それ以外の入力はそのままパワーシェルに送る
+                    powerShellProcess.StandardInput.WriteLine(input);
+                }
                 txtPowerShellInput.Clear();
-                powerShellProcess.StandardInput.WriteLine(input);
             }
         }
 
@@ -419,8 +503,11 @@ namespace MD_Explorer
                 ListBox listBox = (ListBox)activeTab.Controls[0];
                 if (listBox.SelectedItem != null)
                 {
-                    string selectedPath = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
-                    Process.Start(application, selectedPath);
+                    string path = listBox.Tag.ToString();
+                    string selectedItem = listBox.SelectedItem.ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
+                    string fullPath = Path.Combine(path, itemName);
+                    Process.Start(application, fullPath);
                 }
             }
         }
@@ -469,7 +556,7 @@ namespace MD_Explorer
             foreach (string dir in Directory.GetDirectories(path))
             {
                 DirectoryInfo info = new DirectoryInfo(dir);
-                string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
+                string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm");
                 listBox.Items.Add(FormatString("Dir ", Path.GetFileName(dir), "-", lastModified));
             }
             foreach (string file in Directory.GetFiles(path))
@@ -478,7 +565,7 @@ namespace MD_Explorer
                 {
                     FileInfo info = new FileInfo(file);
                     string size = (info.Length / 1024).ToString() + " KB";
-                    string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss");
+                    string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm");
                     listBox.Items.Add(FormatString("File", Path.GetFileName(file), size, lastModified));
                 }
             }
@@ -502,7 +589,7 @@ namespace MD_Explorer
         private string FormatString(string type, string name, string size, string lastModified)
         {
             int nameLength = Encoding.GetEncoding("Shift_JIS").GetByteCount(name);
-            int padding = 40 - nameLength;
+            int padding = 50 - nameLength;
             if (padding < 0) // itemNameの長さが40を超えている場合
             {
                 padding = 0; // paddingを0に設定
@@ -551,7 +638,9 @@ namespace MD_Explorer
                 // 上矢印キーが押されたときの処理
                 if (listBox.SelectedIndex > 0)
                 {
-                    listBox.SelectedIndex--;
+                    int newIndex = listBox.SelectedIndex - 1;
+                    listBox.ClearSelected();  // すべての選択を解除
+                    listBox.SelectedIndex = newIndex;  // 新しい項目を選択
                 }
                 e.Handled = true;
             }
@@ -560,9 +649,49 @@ namespace MD_Explorer
                 // 下矢印キーが押されたときの処理
                 if (listBox.SelectedIndex < listBox.Items.Count - 1)
                 {
-                    listBox.SelectedIndex++;
+                    int newIndex = listBox.SelectedIndex + 1;
+                    listBox.ClearSelected();  // すべての選択を解除
+                    listBox.SelectedIndex = newIndex;  // 新しい項目を選択
                 }
                 e.Handled = true;
+            }
+            else if ((e.Alt && e.KeyCode == Keys.H))
+            {
+                // ALT+Hキーが押されたときの処理
+                if (tabControl1.SelectedIndex > 0) // タブが最初でなければ
+                {
+                    tabControl1.SelectedIndex--; // タブを一つ左に切り替える
+                }
+                e.Handled = true;
+            }
+            else if ((e.Alt && e.KeyCode == Keys.L))
+            {
+                // ALT+Lキーが押されたときの処理
+                if (tabControl1.SelectedIndex < tabControl1.TabPages.Count - 1) // タブが最後でなければ
+                {
+                    tabControl1.SelectedIndex++; // タブを一つ右に切り替える
+                }
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.L)
+            {
+                dropDownMenu.Show(listBox, new Point(0,0));
+                // コンテキストメニューにフォーカスを設定します。
+                dropDownMenu.Focus();
+
+                // 最初の項目を選択します。
+                if (dropDownMenu.Items.Count > 0)
+                {
+                    ((ToolStripMenuItem)dropDownMenu.Items[0]).Select();
+                }
+            }
+            else if (e.KeyCode == Keys.C)
+            {
+                btnCopyName_Click(null, null);
+            }
+            else if (e.KeyCode == Keys.X)
+            {
+                btnCopyFullPath_Click(null, null);
             }
             else if (e.KeyCode == Keys.Enter)
             {
@@ -591,7 +720,8 @@ namespace MD_Explorer
                 BorderStyle = BorderStyle.FixedSingle,
                 Font = new Font(myFont, 11),
                 ItemHeight = 15,
-                DrawMode = DrawMode.OwnerDrawFixed
+                DrawMode = DrawMode.OwnerDrawFixed,
+                SelectionMode = SelectionMode.MultiExtended,
             };
 
             listBox.DrawItem += listBox_DrawItem;
@@ -608,9 +738,9 @@ namespace MD_Explorer
             // このメソッドは、リストボックスのアイテムがダブルクリックされたときに呼び出されます。
             // 現在選択されているアイテムのパスを取得し、そのパスをHandleDoubleClickメソッドに渡します。
             ListBox listBox = (ListBox)sender;
-            if (listBox.SelectedItem != null)
+            for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
             {
-                string selectedPath = listBox.SelectedItem.ToString();
+                string selectedPath = listBox.SelectedItems[i].ToString();
                 string path = listBox.Tag.ToString();
                 HandleDoubleClick(selectedPath, path, listBox, (TabPage)listBox.Parent);
             }
@@ -687,74 +817,86 @@ namespace MD_Explorer
         private void listBox_MouseDown(object sender, MouseEventArgs e)
         {
             // このメソッドは、リストボックスのアイテムがマウスでクリックされたときに呼び出されます。
-            // 中クリックが行われ、アイテムが選択されている場合、そのアイテムを新しいタブで開きます。
             ListBox listBox = (ListBox)sender;
             if (e.Button == MouseButtons.Right)
             {
-                listBox.ClearSelected(); // 選択状態を解除
-            }
-            else if (e.Button == MouseButtons.Middle && listBox.SelectedItem != null)
-            {
-                string selectedPath = listBox.SelectedItem.ToString();
-                string path = listBox.Tag.ToString();
-                if (selectedPath == "ひとつ前に戻る")
-                {
-                    DirectoryInfo parentDir = Directory.GetParent(path);
-                    if (parentDir != null)
-                    {
-                        string parentPath = parentDir.FullName;
-                        OpenNewTab(parentPath);
-                    }
-                }
-                else
-                {
-                    string[] parts = selectedPath.Split(new[] { ": " }, StringSplitOptions.None);
-                    if (parts.Length > 1)
-                    {
-                        // アイテム名のみを取得
-                        string itemName = parts[1].Split(new[] { " サイズ: " }, StringSplitOptions.None)[0];
-                        itemName = itemName.Replace(" サイズ", "").TrimEnd();
-                        // フルパスを取得
-                        selectedPath = Path.Combine(path, itemName);
-                        if (Directory.Exists(selectedPath))
-                        {
-                            OpenNewTab(selectedPath);
-                        }
-                        else if (selectedPath.EndsWith(".lnk"))
-                        {
-                            // PowerShellを使用してショートカットのリンク先を取得
-                            var psi = new ProcessStartInfo();
-                            psi.FileName = "powershell";
-                            psi.UseShellExecute = false;
-                            psi.RedirectStandardOutput = true;
-                            psi.Arguments = string.Format("-Command \"$sh = New-Object -COM WScript.Shell; $sc = $sh.CreateShortcut('{0}'); $sc.TargetPath\"", selectedPath);
-                            var process = Process.Start(psi);
-                            var output = process.StandardOutput.ReadToEnd();
-                            process.WaitForExit();
+                // 右クリックされたとき、dropDownMenuを表示します。
+                dropDownMenu.Show(listBox, new Point(e.X, e.Y));
 
-                            string targetPath = output.Trim();
-                            if (Directory.Exists(targetPath))
-                            {
-                                // リンク先がディレクトリの場合、そのディレクトリを開く
-                                OpenNewTab(targetPath);
-                            }
-                            else if (File.Exists(targetPath))
-                            {
-                                try
-                                {
-                                    // リンク先がファイルの場合、そのファイルを開く
-                                    Process.Start(targetPath);
-                                }
-                                catch (System.ComponentModel.Win32Exception)
-                                {
-                                    // 関連付けられたアプリケーションが存在しない場合、codeで開く。
-                                    Process.Start(fileOpenExe, targetPath);
-                                }
-                            }
-                        }
-                        else
+                // コンテキストメニューにフォーカスを設定します。
+                dropDownMenu.Focus();
+
+                // 最初の項目を選択します。
+                if (dropDownMenu.Items.Count > 0)
+                {
+                    ((ToolStripMenuItem)dropDownMenu.Items[0]).Select();
+                }
+            }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
+                {
+                    string selectedPath = listBox.SelectedItems[i].ToString();
+                    string path = listBox.Tag.ToString();
+                    if (selectedPath == "ひとつ前に戻る")
+                    {
+                        DirectoryInfo parentDir = Directory.GetParent(path);
+                        if (parentDir != null)
                         {
-                            Process.Start(selectedPath);
+                            string parentPath = parentDir.FullName;
+                            OpenNewTab(parentPath);
+                        }
+                    }
+                    else
+                    {
+                        string[] parts = selectedPath.Split(new[] { ": " }, StringSplitOptions.None);
+                        if (parts.Length > 1)
+                        {
+                            // アイテム名のみを取得
+                            string itemName = parts[1].Split(new[] { " サイズ: " }, StringSplitOptions.None)[0];
+                            itemName = itemName.Replace(" サイズ", "").TrimEnd();
+                            // フルパスを取得
+                            selectedPath = Path.Combine(path, itemName);
+                            if (Directory.Exists(selectedPath))
+                            {
+                                OpenNewTab(selectedPath);
+                            }
+                            else if (selectedPath.EndsWith(".lnk"))
+                            {
+                                // PowerShellを使用してショートカットのリンク先を取得
+                                var psi = new ProcessStartInfo();
+                                psi.FileName = "powershell";
+                                psi.UseShellExecute = false;
+                                psi.RedirectStandardOutput = true;
+                                psi.Arguments = string.Format("-Command \"$sh = New-Object -COM WScript.Shell; $sc = $sh.CreateShortcut('{0}'); $sc.TargetPath\"", selectedPath);
+                                var process = Process.Start(psi);
+                                var output = process.StandardOutput.ReadToEnd();
+                                process.WaitForExit();
+
+                                string targetPath = output.Trim();
+                                if (Directory.Exists(targetPath))
+                                {
+                                    // リンク先がディレクトリの場合、そのディレクトリを開く
+                                    OpenNewTab(targetPath);
+                                }
+                                else if (File.Exists(targetPath))
+                                {
+                                    try
+                                    {
+                                        // リンク先がファイルの場合、そのファイルを開く
+                                        Process.Start(targetPath);
+                                    }
+                                    catch (System.ComponentModel.Win32Exception)
+                                    {
+                                        // 関連付けられたアプリケーションが存在しない場合、codeで開く。
+                                        Process.Start(fileOpenExe, targetPath);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Process.Start(selectedPath);
+                            }
                         }
                     }
                 }
