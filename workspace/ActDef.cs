@@ -163,9 +163,16 @@ namespace MD_Explorer
 
         private void btnExecute_Click(object sender, EventArgs e)
         {
-            var scriptInfo = (ScriptInfo)scriptComboBox.SelectedItem;
-            var scriptPath = scriptInfo.FullPath;
-            ExecuteScript(scriptPath);
+            if (scriptComboBox != null && scriptComboBox.SelectedItem != null)
+            {
+                var scriptInfo = (ScriptInfo)scriptComboBox.SelectedItem;
+                var scriptPath = scriptInfo.FullPath;
+                ExecuteScript(scriptPath);
+            }
+            else
+            {
+                MessageBox.Show("スクリプトが選択されていません");
+            }
         }
 
         // 削除ボタンがクリックされたときのイベントハンドラを追加
@@ -239,6 +246,19 @@ namespace MD_Explorer
                 RefreshActiveTab();
             }
         }
+        private void btn_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.Enter)
+            {
+                // エンターキーが押されたときにbtnSearch_Clickメソッドを呼び出す
+                btnSearch_Click(btnSearch, new MouseEventArgs(MouseButtons.Middle, 1, 0, 0, 0));
+            }
+            else if (e.KeyCode == Keys.Enter)
+            {
+                // エンターキーが押されたときにbtnSearch_Clickメソッドを呼び出す
+                btnSearch_Click(btnSearch, new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
+            }
+        }
 
         private void btnSearch_Click(object sender, MouseEventArgs e)
         {
@@ -279,7 +299,7 @@ namespace MD_Explorer
                 catch (System.ComponentModel.Win32Exception)
                 {
                     // 関連付けられたアプリケーションが存在しない場合、codeで開く。
-                    Process.Start(fileOpenExe, path);
+                    Process.Start(GlobalSettings.fileOpenExe, path);
                     txtSearchBar.Text = string.Empty;
                 }
             }
@@ -297,16 +317,16 @@ namespace MD_Explorer
             {
                 if (tabControl1.TabPages.Count == 0)
                 {
-                    OpenNewTab(homeDirectory);
+                    OpenNewTab(GlobalSettings.homeDirectory);
                 }
                 else
                 {
-                    UpdateActiveTab(homeDirectory);
+                    UpdateActiveTab(GlobalSettings.homeDirectory);
                 }
             }
             else if (e.Button == MouseButtons.Middle)
             {
-                OpenNewTab(homeDirectory);
+                OpenNewTab(GlobalSettings.homeDirectory);
             }
         }
 
@@ -453,7 +473,7 @@ namespace MD_Explorer
                 {
                     // 「home」が入力されたときにディレクトリを変更する
                     string home = GetCurrentTabDirectory();
-                    powerShellProcess.StandardInput.WriteLine("cd " + home + ";Write-Host pwd " + home ); 
+                    powerShellProcess.StandardInput.WriteLine("cd \'" + home + "\';Write-Host pwd \'" + home +"\'"); 
                 }
                 else
                 {
@@ -578,7 +598,7 @@ namespace MD_Explorer
             tabPage.Tag = new TabData
             {
                 Path = path,
-                NetworkIndex = path[0] % 4, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
+                NetworkIndex = path[0] % 8, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
                 CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
             };
 
@@ -624,7 +644,7 @@ namespace MD_Explorer
             tabPage.Tag = new TabData
             {
                 Path = path,
-                NetworkIndex = path[0] % 4, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
+                NetworkIndex = path[0] % 8, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
                 CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
             };
             tabControl1.TabPages.Add(tabPage);
@@ -685,11 +705,11 @@ namespace MD_Explorer
                     ((ToolStripMenuItem)dropDownMenu.Items[0]).Select();
                 }
             }
-            else if (e.KeyCode == Keys.C)
+            else if (e.KeyCode == Keys.X)
             {
                 btnCopyName_Click(null, null);
             }
-            else if (e.KeyCode == Keys.X)
+            else if (e.KeyCode == Keys.C)
             {
                 btnCopyFullPath_Click(null, null);
             }
@@ -704,6 +724,8 @@ namespace MD_Explorer
                     HandleDoubleClick(selectedPath, path, listBox, tabPage);
                 }
             }
+        // 選択個数を表示するラベルを更新
+        labelSelectedCount.Text = String.Format("選択された項目数: {0}", listBox.SelectedItems.Count);
         }
 
         private ListBox CreateListBox(string path, TabPage tabPage)
@@ -718,7 +740,7 @@ namespace MD_Explorer
                 BackColor = Color.Black,
                 ForeColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font(myFont, 11),
+                Font = new Font(GlobalSettings.myFont, 11),
                 ItemHeight = 15,
                 DrawMode = DrawMode.OwnerDrawFixed,
                 SelectionMode = SelectionMode.MultiExtended,
@@ -802,7 +824,7 @@ namespace MD_Explorer
                             catch (System.ComponentModel.Win32Exception)
                             {
                                 // 関連付けられたアプリケーションが存在しない場合、codeで開く。
-                                Process.Start(fileOpenExe, targetPath);
+                                Process.Start(GlobalSettings.fileOpenExe, targetPath);
                             }
                         }
                     }
@@ -889,7 +911,7 @@ namespace MD_Explorer
                                     catch (System.ComponentModel.Win32Exception)
                                     {
                                         // 関連付けられたアプリケーションが存在しない場合、codeで開く。
-                                        Process.Start(fileOpenExe, targetPath);
+                                        Process.Start(GlobalSettings.fileOpenExe, targetPath);
                                     }
                                 }
                             }
@@ -901,6 +923,8 @@ namespace MD_Explorer
                     }
                 }
             }
+        // 選択個数を表示するラベルを更新
+        labelSelectedCount.Text = String.Format("選択された項目数: {0}", listBox.SelectedItems.Count);
         }
     }
 }

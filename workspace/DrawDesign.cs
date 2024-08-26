@@ -45,7 +45,7 @@ namespace MD_Explorer
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             // タブの背景色を設定
-            Color[] tabColors = { Color.Black, Color.Red, Color.Blue, Color.Green, Color.Brown };
+            Color[] tabColors = { Color.Black, Color.Red, Color.Blue, Color.Green, Color.Brown, Color.Purple, Color.Pink, Color.Turquoise, Color.Orange };
             TabData tabData = (TabData)tabControl1.TabPages[e.Index].Tag; // 修正箇所
             int networkIndex = tabData.NetworkIndex; // 修正箇所
             e.Graphics.FillRectangle(new SolidBrush(tabColors[networkIndex]), e.Bounds);
