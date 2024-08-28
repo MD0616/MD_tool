@@ -142,6 +142,65 @@ namespace MD_Explorer
             }
         }
 
+        public void OpenNewTab(string path)
+        {
+            // このメソッドは、指定されたパスで新しいタブを開きます。
+            // パスのアクセス権限を確認し、新しいタブとリストボックスを作成します。
+            // リストボックスのタグに現在のパスを設定し、タブをタブコントロールに追加します。
+            if (!HasAccessPermission(path))
+            {
+                MessageBox.Show("指定されたパスにアクセスする権限がありません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string dirName = new DirectoryInfo(path).Name;
+            TabPage tabPage = new TabPage(dirName)
+            {
+                BackColor = Color.Black,
+                ForeColor = Color.White,
+            };
+
+            ListBox listBox = CreateListBox(path, tabPage);
+            listBox.Tag = path;
+
+            tabPage.Controls.Add(listBox);
+            // ネットワークのインデックスをタブのTagプロパティに保存
+            tabPage.Tag = new TabData
+            {
+                Path = path,
+                NetworkIndex = path[0] % 8, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
+                CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
+            };
+            tabControl1.TabPages.Add(tabPage);
+        }
+
+        private ListBox CreateListBox(string path, TabPage tabPage)
+        {
+            // このメソッドは、新しいリストボックスを作成します。
+            // リストボックスのプロパティを設定し、イベントハンドラを追加します。
+            // 指定されたパスでリストボックスを更新します。
+            // 最後に、新しく作成したリストボックスを返します。
+            ListBox listBox = new ListBox
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.Black,
+                ForeColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font(GlobalSettings.myFont, 10),
+                ItemHeight = 14,
+                DrawMode = DrawMode.OwnerDrawFixed,
+                SelectionMode = SelectionMode.MultiExtended,
+            };
+            listBox.KeyPress += new KeyPressEventHandler(listBox_KeyPress);
+            listBox.DrawItem += listBox_DrawItem;
+            listBox.MouseDoubleClick += listBox_MouseDoubleClick;
+            listBox.MouseDown += listBox_MouseDown;
+            listBox.KeyDown += HandleKeyDown;
+            UpdateListBox(listBox, path, tabPage);
+
+            return listBox;
+        }
+
         private void UpdateListBox(ListBox listBox, string path, TabPage tabPage)
         {
             // このメソッドは、指定されたパスでリストボックスを更新します。
@@ -203,64 +262,5 @@ namespace MD_Explorer
             return string.Format("[{0}]: {1}{2} サイズ: {3,-12} 更新日時: {4}", type, name, new string(' ', padding), size, lastModified);
         }
 
-
-        public void OpenNewTab(string path)
-        {
-            // このメソッドは、指定されたパスで新しいタブを開きます。
-            // パスのアクセス権限を確認し、新しいタブとリストボックスを作成します。
-            // リストボックスのタグに現在のパスを設定し、タブをタブコントロールに追加します。
-            if (!HasAccessPermission(path))
-            {
-                MessageBox.Show("指定されたパスにアクセスする権限がありません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            string dirName = new DirectoryInfo(path).Name;
-            TabPage tabPage = new TabPage(dirName)
-            {
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-            };
-
-            ListBox listBox = CreateListBox(path, tabPage);
-            listBox.Tag = path;
-
-            tabPage.Controls.Add(listBox);
-            // ネットワークのインデックスをタブのTagプロパティに保存
-            tabPage.Tag = new TabData
-            {
-                Path = path,
-                NetworkIndex = path[0] % 8, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
-                CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
-            };
-            tabControl1.TabPages.Add(tabPage);
-        }
-
-        private ListBox CreateListBox(string path, TabPage tabPage)
-        {
-            // このメソッドは、新しいリストボックスを作成します。
-            // リストボックスのプロパティを設定し、イベントハンドラを追加します。
-            // 指定されたパスでリストボックスを更新します。
-            // 最後に、新しく作成したリストボックスを返します。
-            ListBox listBox = new ListBox
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font(GlobalSettings.myFont, 10),
-                ItemHeight = 14,
-                DrawMode = DrawMode.OwnerDrawFixed,
-                SelectionMode = SelectionMode.MultiExtended,
-            };
-            listBox.KeyPress += new KeyPressEventHandler(listBox_KeyPress);
-            listBox.DrawItem += listBox_DrawItem;
-            listBox.MouseDoubleClick += listBox_MouseDoubleClick;
-            listBox.MouseDown += listBox_MouseDown;
-            listBox.KeyDown += HandleKeyDown;
-            UpdateListBox(listBox, path, tabPage);
-
-            return listBox;
-        }
     }
 }

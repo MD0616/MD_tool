@@ -10,9 +10,9 @@ namespace MD_Explorer
     // Static class to hold global-like variables
     static class GlobalSettings
     {
-        public static string homeDirectory = "C:"; // Home directory path
-        public static string csvPath = "D:\\workspace\\aaa.csv"; // Shortcut file path
-        public static string myToolPath = "D:\\workspace\\sss";
+        public static string homeDirectory = @"C:"; // Home directory path
+        public static string csvPath = @"D:\workspace\aaa.csv"; // Shortcut file path
+        public static string myToolPath = @"D:\workspace\sss";
         public static string myFont = "瀬戸フォント";
         public static string fileOpenExe = "code";
         public static int btnSizeWidth = 80;
@@ -77,7 +77,7 @@ namespace MD_Explorer
             // アプリケーションの実行ディレクトリを取得
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
             // 相対パスを使用して設定ファイルのパスを指定
-            string configFilePath = Path.Combine(appDirectory, "Setting\\setting.config");
+            string configFilePath = Path.Combine(appDirectory, @"Setting\setting.config");
             GlobalSettings.LoadSettings(configFilePath); // 設定を読み込む
 
             switch (args.Length)

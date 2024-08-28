@@ -32,6 +32,7 @@ namespace MD_Explorer
         private ComboBox scriptComboBox;
         private ContextMenuStrip contextMenu;
         private ContextMenuStrip dropDownMenu;
+        private Button btnCopyMove;
 
         // MainFormクラスのコンストラクタ。オブジェクトが生成されるときに呼び出されます。
         public MainForm()
@@ -39,7 +40,7 @@ namespace MD_Explorer
             KeyPreview = true; // フォームがキーイベントを受け取るように設定
             KeyDown += new KeyEventHandler(MainForm_KeyDown);
             InitializeComponent(); // フォーム上のコントロールの初期化を行います。このメソッドはデザイナによって自動的に生成されます。
-            Icon = new Icon("Icon\\MD_Explorer.ico");
+            Icon = new Icon(@"Icon\MD_Explorer.ico");
         }
 
         // HomeDirectoryプロパティ。GlobalSettings.homeDirectoryフィールドの値を取得または設定します。
