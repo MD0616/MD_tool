@@ -1,0 +1,1 @@
+csc.exe /target:winexe /win32icon:..\Icon\MD_Explorer.ico /out:..\MD_Explorer.exe /reference:"C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll" "Event\*.cs"  "Main\*.cs" "Setting\*.cs"
