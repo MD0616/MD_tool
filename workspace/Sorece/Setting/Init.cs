@@ -43,8 +43,8 @@ namespace MD_Explorer
         private void InitializeComponent()
         {
             // ダークモードの設定
-            this.BackColor = Color.Black;
-            this.ForeColor = Color.White; // 文字色を白に設定
+            this.BackColor = GlobalSettings.formBackColor;
+            this.ForeColor = GlobalSettings.formTextColor;
 
             // PowerShellの出力を表示するTextBoxの初期化
             txtPowerShellOutput = new TextBox
@@ -52,10 +52,10 @@ namespace MD_Explorer
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 Dock = DockStyle.Bottom,
-                BackColor = Color.Black,
+                BackColor = GlobalSettings.txtBackColor,
+                ForeColor = GlobalSettings.txtTextColor,
                 Height = 1000,
-                ForeColor = Color.White,
-                Font = new Font(GlobalSettings.myFont, 10),
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont),
                 ReadOnly = true
             };
 
@@ -63,17 +63,17 @@ namespace MD_Explorer
             txtPowerShellInput = new TextBox
             {
                 Dock = DockStyle.Bottom,
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                Font = new Font(GlobalSettings.myFont, 10)
+                BackColor = GlobalSettings.txtBackColor,
+                ForeColor = GlobalSettings.txtTextColor,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont)
             };
             txtPowerShellInput.KeyDown += TxtPowerShellInput_KeyDown;
 
             // コンテキストメニューの初期化
             contextMenu = new ContextMenuStrip();
             {
-                contextMenu.BackColor = Color.Black; // 背景色を黒に設定
-                contextMenu.ForeColor = Color.White; // 文字色を白に設定
+                contextMenu.BackColor = GlobalSettings.contxtBackColor; // 背景色を黒に設定
+                contextMenu.ForeColor = GlobalSettings.contxtTextColor; // 文字色を白に設定
                 contextMenu.Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont); // 文字サイズを大きくする
                 contextMenu.Renderer = new MyRenderer();
 
@@ -96,8 +96,8 @@ namespace MD_Explorer
                             // メニューアイテムの作成
                             ToolStripMenuItem menuItem1 = new ToolStripMenuItem(displayName);
                             menuItem1.Tag = fullPath; // フルパスをTagプロパティに保存
-                            menuItem1.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                            menuItem1.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                            menuItem1.BackColor = GlobalSettings.menuBackColor; // メニューアイテムの背景色を黒に設定
+                            menuItem1.ForeColor = GlobalSettings.menuTextColor; // メニューアイテムの文字色を白に設定
 
                             contextMenu.Items.Add(menuItem1);
                         }
@@ -109,35 +109,35 @@ namespace MD_Explorer
             // 新しいコンテキストメニューの初期化
             dropDownMenu = new ContextMenuStrip();
             {
-                dropDownMenu.BackColor = Color.Black; // 背景色を黒に設定
-                dropDownMenu.ForeColor = Color.White; // 文字色を白に設定
+                dropDownMenu.BackColor = GlobalSettings.dropDownBackColor;
+                dropDownMenu.ForeColor = GlobalSettings.dropDownTextColor;
                 dropDownMenu.Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont); // 文字サイズを大きくする
                 dropDownMenu.Renderer = new MyRenderer();
 
                 // アイテムの作成
                 ToolStripMenuItem menuItemRename = new ToolStripMenuItem("リネーム");
-                menuItemRename.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                menuItemRename.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemRename.BackColor = GlobalSettings.menuBackColor;
+                menuItemRename.ForeColor = GlobalSettings.menuTextColor;
                 menuItemRename.Click += eventRename_Click;
 
                 ToolStripMenuItem menuItemDelete = new ToolStripMenuItem("削除");
-                menuItemDelete.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                menuItemDelete.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemDelete.BackColor = GlobalSettings.menuBackColor;
+                menuItemDelete.ForeColor = GlobalSettings.menuTextColor;
                 menuItemDelete.Click += eventDelete_Click;
 
                 ToolStripMenuItem menuItemGetFileName = new ToolStripMenuItem("ファイル名取得");
-                menuItemGetFileName.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                menuItemGetFileName.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemGetFileName.BackColor = GlobalSettings.menuBackColor;
+                menuItemGetFileName.ForeColor = GlobalSettings.menuTextColor;
                 menuItemGetFileName.Click += eventCopyName_Click;
 
                 ToolStripMenuItem menuItemGetPath = new ToolStripMenuItem("パス取得");
-                menuItemGetPath.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                menuItemGetPath.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemGetPath.BackColor = GlobalSettings.menuBackColor;
+                menuItemGetPath.ForeColor = GlobalSettings.menuTextColor;
                 menuItemGetPath.Click += eventCopyFullPath_Click;
 
                 ToolStripMenuItem menuItemOpenVScode = new ToolStripMenuItem("VScodeで開く");
-                menuItemOpenVScode.BackColor = Color.Black; // メニューアイテムの背景色を黒に設定
-                menuItemOpenVScode.ForeColor = Color.White; // メニューアイテムの文字色を白に設定
+                menuItemOpenVScode.BackColor = GlobalSettings.menuBackColor;
+                menuItemOpenVScode.ForeColor = GlobalSettings.menuTextColor;
                 menuItemOpenVScode.Click += eventVSCode_Click;
 
                 // アイテムをコンテキストメニューに追加
@@ -168,8 +168,8 @@ namespace MD_Explorer
                         scriptComboBox.Items.Add(scriptInfo);
                     }
                 }
-                scriptComboBox.BackColor = Color.Black; // 背景色を黒に設定
-                scriptComboBox.ForeColor = Color.White; // 文字色を白に設定
+                scriptComboBox.BackColor = GlobalSettings.comboBoxBackColor; // 背景色を黒に設定
+                scriptComboBox.ForeColor = GlobalSettings.comboBoxTextColor; // 文字色を白に設定
                 scriptComboBox.Width = 250;
                 scriptComboBox.Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont); // 文字サイズを大きくする
                 scriptComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; // ウィンドウのサイズに合わせて伸縮
@@ -179,8 +179,8 @@ namespace MD_Explorer
             txtSearchBar = new TextBox
             {
                 Name = "SearchBar",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 BorderStyle = BorderStyle.FixedSingle, // 枠線スタイルを固定に設定
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
@@ -192,14 +192,13 @@ namespace MD_Explorer
             {
                 Text = "実行",
                 Name = "ScriptDo",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
-                FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
+                Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
-            btnExecute.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
             btnExecute.Click += new EventHandler(btnExecute_Click);
 
             // ショートカットボタンの初期化
@@ -207,15 +206,13 @@ namespace MD_Explorer
             {
                 Text = "リンク",
                 Name = "Link",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
-                FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
-            btnShortcut.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
             btnShortcut.Click += new EventHandler(btnShortcut_Click);
 
             // 決定ボタンの初期化
@@ -223,15 +220,13 @@ namespace MD_Explorer
             {
                 Text = "決定",
                 Name = "Search",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
-                FlatStyle = FlatStyle.Flat, // フラットスタイルに設定
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
-            btnSearch.FlatAppearance.BorderColor = Color.Gray; // 縁を灰色に設定
             btnSearch.KeyDown += new KeyEventHandler(btn_KeyDown);
             btnSearch.MouseDown += new MouseEventHandler(btnSearch_Click);
 
@@ -240,15 +235,13 @@ namespace MD_Explorer
             {
                 Text = "ホーム",
                 Name = "Home",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            btnHome.FlatAppearance.BorderColor = Color.Gray;
             btnHome.KeyDown += new KeyEventHandler(btn_KeyDown);
             btnHome.MouseDown += new MouseEventHandler(btnHome_Click);
 
@@ -257,15 +250,13 @@ namespace MD_Explorer
             {
                 Text = "更新",
                 Name = "Refresh",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            btnRefresh.FlatAppearance.BorderColor = Color.Gray;
             btnRefresh.Click += new EventHandler(btnRefresh_Click);
 
             // エクスプローラボタンの初期化
@@ -273,15 +264,13 @@ namespace MD_Explorer
             {
                 Text = "Explorer",
                 Name = "Explorer",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top| AnchorStyles.Left
             };
-            btnExplorer.FlatAppearance.BorderColor = Color.Gray;
             btnExplorer.Click += new EventHandler(btnExplorer_Click);
 
             // ターミナルボタンの初期化
@@ -289,15 +278,13 @@ namespace MD_Explorer
             {
                 Text = "Terminal",
                 Name = "Terminal",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Bottom| AnchorStyles.Right
             };
-            btnTerminal.FlatAppearance.BorderColor = Color.Gray;
             btnTerminal.MouseDown += new MouseEventHandler(btnTerminal_MouseDown);
 
             // Labelコントロールの初期化
@@ -305,8 +292,8 @@ namespace MD_Explorer
             {
                 Text = "選択された数: 0",
                 Name = "ListCount",
-                BackColor = Color.Transparent, // 背景色を透明に設定
-                ForeColor = Color.White, // 文字色を黒に設定
+                BackColor = GlobalSettings.labelBackColor,
+                ForeColor = GlobalSettings.labelTextColor,
                 AutoSize = true, // サイズを自動調整
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.labelSizeFont), // フォントを設定
                 Anchor = AnchorStyles.Top | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
@@ -316,8 +303,8 @@ namespace MD_Explorer
             tabControl1 = new TabControl
             {
                 Name = "TabCtrl",
-                BackColor = Color.Black, // 背景色を黒に設定
-                ForeColor = Color.White, // 文字色を白に設定
+                BackColor = GlobalSettings.tabBackColor,
+                ForeColor = GlobalSettings.tabTextColor,
                 Size = new Size(700, 400), // サイズを指定
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.tabSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
@@ -333,15 +320,13 @@ namespace MD_Explorer
             {
                 Text = "Get PWD",
                 Name = "GetPWD",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            btnCopyPath.FlatAppearance.BorderColor = Color.Gray;
             btnCopyPath.Click += new EventHandler(btnCopyPath_Click);
 
             // 新規ファイルを作成するボタン
@@ -349,15 +334,13 @@ namespace MD_Explorer
             {
                 Text = "New File",
                 Name = "NewFile",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            btnNewFile.FlatAppearance.BorderColor = Color.Gray;
             btnNewFile.Click += new EventHandler(btnNewFile_Click);
 
             // 新規フォルダを作成するボタン
@@ -365,31 +348,27 @@ namespace MD_Explorer
             {
                 Text = "New Dir",
                 Name = "NewDir",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            btnNewFolder.FlatAppearance.BorderColor = Color.Gray;
             btnNewFolder.Click += new EventHandler(btnNewFolder_Click);
 
             btnCopyMove = new Button
             {
                 Text = "Copy&Move",
                 Name = "Copy&Move",
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
                 Width = GlobalSettings.btnSizeWidth,
                 Height = GlobalSettings.btnSizeHeight,
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            btnNewFolder.FlatAppearance.BorderColor = Color.Gray;
-            btnCopyMove.Click += BtnCopyMove_Click;
+            btnCopyMove.Click += btnCopyMove_Click;
 
             // FlowLayoutPanelの初期化（ホーム、更新ボタン用）
             FlowLayoutPanel topPanel = new FlowLayoutPanel

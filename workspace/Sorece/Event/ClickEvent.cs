@@ -286,12 +286,5 @@ namespace MD_Explorer
         // 選択個数を表示するラベルを更新
         labelSelectedCount.Text = String.Format("選択された項目数: {0}", listBox.SelectedItems.Count);
         }
-        private void BtnCopyMove_Click(object sender, EventArgs e)
-        {
-            using (CopyMoveForm copyMoveForm = new CopyMoveForm())
-            {
-                copyMoveForm.ShowDialog();
-            }
-        }
     }
 }

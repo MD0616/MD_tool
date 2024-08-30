@@ -168,7 +168,6 @@ namespace MD_Explorer
             tabPage.Tag = new TabData
             {
                 Path = path,
-                NetworkIndex = path[0] % 8, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
                 CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
             };
             tabControl1.TabPages.Add(tabPage);
@@ -183,10 +182,10 @@ namespace MD_Explorer
             ListBox listBox = new ListBox
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.Black,
-                ForeColor = Color.White,
+                BackColor = GlobalSettings.listBoxBackColor,
+                ForeColor = GlobalSettings.listBoxTextColor,
                 BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font(GlobalSettings.myFont, 10),
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.listSizeFont),
                 ItemHeight = 14,
                 DrawMode = DrawMode.OwnerDrawFixed,
                 SelectionMode = SelectionMode.MultiExtended,
@@ -243,7 +242,6 @@ namespace MD_Explorer
             tabPage.Tag = new TabData
             {
                 Path = path,
-                NetworkIndex = path[0] % 8, // パスの先頭文字をASCII値に変換し、その値を4で割った余りを使用
                 CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
             };
 

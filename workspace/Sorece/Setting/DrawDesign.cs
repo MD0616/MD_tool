@@ -45,10 +45,9 @@ namespace MD_Explorer
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             // タブの背景色を設定
-            Color[] tabColors = { Color.Black, Color.Red, Color.Blue, Color.Green, Color.Brown, Color.Purple, Color.Pink, Color.Turquoise, Color.Orange };
-            TabData tabData = (TabData)tabControl1.TabPages[e.Index].Tag; // 修正箇所
-            int networkIndex = tabData.NetworkIndex; // 修正箇所
-            e.Graphics.FillRectangle(new SolidBrush(tabColors[networkIndex]), e.Bounds);
+            TabData tabData = (TabData)tabControl1.TabPages[e.Index].Tag;
+            Color tabColor = GlobalSettings.GetColorFromPath(tabData.Path);
+            e.Graphics.FillRectangle(new SolidBrush(tabColor), e.Bounds);
 
             // タブのテキストを描画
             string tabText = tabControl1.TabPages[e.Index].Text;
@@ -64,7 +63,7 @@ namespace MD_Explorer
             // タブの閉じるボタンの表示領域
             int closeButtonWidth = 15;
             int closeButtonHeight = 12;
-            int closeButtonMargin = 10; // タブ名と閉じるボタンの間のマージン
+            int closeButtonMargin = 10;
             int closeButtonX = e.Bounds.Right - closeButtonWidth - closeButtonMargin;
             if (closeButtonX < e.Bounds.Left + textSize.Width + closeButtonMargin)
             {
@@ -81,7 +80,7 @@ namespace MD_Explorer
             for (int i = 0; i < tabControl1.TabPages.Count; i++) // 各タブをチェック
             {
                 Rectangle r = tabControl1.GetTabRect(i); // タブの矩形を取得
-                TabData tabData = (TabData)tabControl1.TabPages[i].Tag; // 修正箇所
+                TabData tabData = (TabData)tabControl1.TabPages[i].Tag;
                 Rectangle closeButton = tabData.CloseButton; // 閉じるボタンの矩形を取得
                 if (closeButton.Contains(e.Location)) // マウスクリックが閉じるボタン内か確認
                 {
@@ -102,13 +101,14 @@ public class MyRenderer : ToolStripProfessionalRenderer
         else
         {
             Rectangle rc = new Rectangle(Point.Empty, e.Item.Size);
-            e.Graphics.FillRectangle(Brushes.DarkGray, rc);
+            e.Graphics.FillRectangle(Brushes.Gray, rc);
         }
     }
 
     protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
     {
+        Brush marginColor = new SolidBrush(MD_Explorer.GlobalSettings.menuBackColor);
         // ここでマージンの背景色を描画します。
-        e.Graphics.FillRectangle(Brushes.Black, e.AffectedBounds);
+        e.Graphics.FillRectangle(marginColor, e.AffectedBounds);
     }
 }

@@ -22,15 +22,14 @@ namespace MD_Explorer
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 Text = caption,
                 StartPosition = FormStartPosition.CenterScreen,
-                BackColor = Color.FromArgb(45, 45, 48),
-                ForeColor = Color.White
+                BackColor = GlobalSettings.formBackColor,
+                ForeColor = GlobalSettings.formTextColor,
             };
 
             Label textLabel = new Label() { Left = 50, Top = 20, Text = text, AutoSize = true };
-            TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400, BackColor = Color.Black, ForeColor = Color.White };
+            TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400, BackColor = GlobalSettings.txtTextColor, ForeColor = GlobalSettings.txtTextColor};
 
-            Button confirmation = new Button() { Text = "OK", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK, BackColor = Color.Black, ForeColor = Color.White };
-            confirmation.FlatAppearance.BorderColor = Color.Gray;
+            Button confirmation = new Button() { Text = "OK", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK, BackColor = GlobalSettings.btnBackColor, ForeColor = GlobalSettings.btnTextColor };
             confirmation.FlatStyle = FlatStyle.Flat;
 
             prompt.Controls.Add(textBox);
@@ -75,6 +74,14 @@ namespace MD_Explorer
         public CopyMoveForm()
         {
             InitializeComponent();
+            this.FormClosed += new FormClosedEventHandler(CopyMoveForm_FormClosed);
+
+            Icon = new Icon(@"Icon\MD_Explorer.ico");
+        }
+
+        void CopyMoveForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Dispose();
         }
 
         private void InitializeComponent()
@@ -82,33 +89,37 @@ namespace MD_Explorer
             // コントロールの初期化と配置
             lblSource = new Label
             {
-                Text = "コピーまたは移動するファイル、ディレクトリをフルパスで記載してください。\n複数アイテムの場合は改行で分けてください。",
+                Text = "\n・コピーまたは移動するファイル、ディレクトリをフルパスで記載してください。\n  ※ 複数アイテムの場合は改行で分けてください。",
                 Dock = DockStyle.Top,
-                AutoSize = true
+                AutoSize = true,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.labelSizeFont), // フォントを設定
             };
             txtSource = new TextBox
             {
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 Dock = DockStyle.Top,
-                Height = 100, // 高さを適切に設定
-                BackColor = Color.FromArgb(30, 30, 30), // ダークモードの背景色
-                ForeColor = Color.White // テキストの色
+                Height = 250, // 高さを適切に設定
+                BackColor = GlobalSettings.txtBackColor,
+                ForeColor = GlobalSettings.txtTextColor,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont)
             };
             lblDestination = new Label
             {
-                Text = "コピー、移動先を記載してください。\n複数個所へコピー場合は改行で分けてください。",
+                Text = "\n・コピー、移動先を記載してください。\n  ※ 複数個所へコピー場合は改行で分けてください。",
                 Dock = DockStyle.Top,
-                AutoSize = true
+                AutoSize = true,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.labelSizeFont), // フォントを設定
             };
             txtDestination = new TextBox
             {
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 Dock = DockStyle.Top,
-                Height = 100, // 高さを適切に設定
-                BackColor = Color.FromArgb(30, 30, 30), // ダークモードの背景色
-                ForeColor = Color.White // テキストの色
+                Height = 250, // 高さを適切に設定
+                BackColor = GlobalSettings.txtBackColor,
+                ForeColor = GlobalSettings.txtTextColor,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont)
             };
 
             // ボタンの初期化
@@ -120,20 +131,20 @@ namespace MD_Explorer
             btnCancel = new Button
             {
                 Text = "キャンセル",
-                BackColor = Color.FromArgb(45, 45, 45), // ダークモードの背景色
-                ForeColor = Color.White // テキストの色
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
             };
             btnCopy = new Button
             {
                 Text = "コピー",
-                BackColor = Color.FromArgb(45, 45, 45), // ダークモードの背景色
-                ForeColor = Color.White // テキストの色
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
             };
             btnMove = new Button
             {
                 Text = "移動",
-                BackColor = Color.FromArgb(45, 45, 45), // ダークモードの背景色
-                ForeColor = Color.White // テキストの色
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
             };
 
             // ボタンをパネルに追加
@@ -162,8 +173,9 @@ namespace MD_Explorer
             Controls.Add(lblSource); // ソースラベルを追加
 
             // フォームのプロパティ設定
-            this.BackColor = Color.FromArgb(20, 20, 20); // ダークモードの背景色
-            this.ForeColor = Color.White; // テキストの色
+            this.BackColor = GlobalSettings.formBackColor;
+            this.ForeColor = GlobalSettings.formTextColor;
+            this.Width = 800;
             this.AutoSize = true; // フォームのサイズをコントロールに合わせて自動調整
             this.Text = "コピーと移動"; // フォームのタイトルを設定
         }
@@ -275,8 +287,8 @@ namespace MD_Explorer
             TextBox txtResults = new TextBox
             {
                 Multiline = true,
-                BackColor = Color.FromArgb(45, 45, 45), // ダークモードの背景色
-                ForeColor = Color.White, // テキストの色
+                BackColor = GlobalSettings.txtBackColor,
+                ForeColor = GlobalSettings.txtTextColor,
                 ScrollBars = ScrollBars.Vertical,
                 Dock = DockStyle.Fill,
                 ReadOnly = true
@@ -314,7 +326,9 @@ namespace MD_Explorer
             Form resultsForm = new Form
             {
                 Text = "操作結果",
-                Size = new Size(500, 300)
+                Size = new Size(500, 400),
+                BackColor = GlobalSettings.formBackColor,
+                ForeColor = GlobalSettings.formTextColor,
             };
             resultsForm.Controls.Add(txtResults);
             resultsForm.ShowDialog();
@@ -325,7 +339,6 @@ namespace MD_Explorer
     public class TabData
     {
         public string Path { get; set; }
-        public int NetworkIndex { get; set; }
         public Rectangle CloseButton { get; set; } // 閉じるボタンの矩形を追加
     }
 

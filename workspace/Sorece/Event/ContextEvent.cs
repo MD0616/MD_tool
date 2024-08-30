@@ -16,7 +16,6 @@ namespace MD_Explorer
         // 削除ボタンがクリックされたときのイベントハンドラを追加
         private void eventDelete_Click(object sender, EventArgs e)
         {
-            // 現在選択されているタブがある場合、そのタブの現在選択されているアイテムの名前を取得し、その名前をクリップボードにコピーします。
             if (tabControl1.SelectedTab != null)
             {
                 TabPage activeTab = tabControl1.SelectedTab;
@@ -26,21 +25,51 @@ namespace MD_Explorer
                 {
                     string path = listBox.Tag.ToString();
                     string selectedItem = listBox.SelectedItems[i].ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
-                    string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
+                    string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0];
                     string fullPath = Path.Combine(path, itemName);
-                    // 削除確認ダイアログを表示
-                    var result = MessageBox.Show(string.Format("'{0}'を削除してもよろしいですか？", itemName), "削除確認", MessageBoxButtons.YesNo);
-                    if (result == DialogResult.Yes)
+
+                    if (!Directory.Exists(GlobalSettings.dustBoxPath))
                     {
-                        // ファイルまたはディレクトリを削除
-                        if (File.Exists(fullPath))
+                        Directory.CreateDirectory(GlobalSettings.dustBoxPath);
+                    }
+
+                    string absoluteDustBoxPath = Path.GetFullPath(GlobalSettings.dustBoxPath);
+                    
+                    // 移動したアイテムが指定ディレクトリ内のものであれば完全削除
+                    if (absoluteDustBoxPath.Equals(path, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var deleteResult = MessageBox.Show(string.Format("'{0}'を完全に削除してもよろしいですか？", itemName), "完全削除確認", MessageBoxButtons.YesNo);
+
+                        if (deleteResult == DialogResult.Yes)
                         {
-                            File.Delete(fullPath);
+                            if (File.Exists(fullPath))
+                            {
+                                File.Delete(fullPath);
+                            }
+                            else if (Directory.Exists(fullPath))
+                            {
+                                Directory.Delete(fullPath, true);
+                            }
                         }
-                        else if (Directory.Exists(fullPath))
+                    }
+                    else
+                    {
+                        // 削除確認ダイアログを表示
+                        var result = MessageBox.Show(string.Format("'{0}'を削除してもよろしいですか？", itemName), "削除確認", MessageBoxButtons.YesNo);
+
+                        if (result == DialogResult.Yes)
                         {
-                            Directory.Delete(fullPath, true);
+                            // ファイルまたはディレクトリを移動
+                            if (File.Exists(fullPath))
+                            {
+                                File.Move(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
+                            }
+                            else if (Directory.Exists(fullPath))
+                            {
+                                Directory.Move(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
+                            }
                         }
+
                     }
                 }
             }

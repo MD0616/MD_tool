@@ -167,11 +167,13 @@ namespace MD_Explorer
                 }
             }
         }
+
         // Copy&Moveボタンのクリックイベントハンドラ
         private void btnCopyMove_Click(object sender, EventArgs e)
         {
             // コピー&移動ウィンドウを表示
             CopyMoveForm copyMoveForm = new CopyMoveForm();
+            copyMoveForm.Show();
         }
     }
 }

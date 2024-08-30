@@ -4,15 +4,36 @@ using System.Windows.Forms;
 using System.Text;
 using System.Xml; // XmlDocument と XmlNodeList のため
 using System.Collections.Specialized; // NameValueCollection のため
-
+using System.Drawing;
+using System.Collections.Generic;
+// Color[] tabColors = { Color.Black, Color.Red, Color.Blue, Color.Green, Color.Brown, Color.Purple, Color.Pink, Color.Turquoise, Color.Orange };
 namespace MD_Explorer
 {
     // Static class to hold global-like variables
     static class GlobalSettings
     {
+        // パスと色のマッピングを定義
+        private static Dictionary<string, Color> pathColorMapping = new Dictionary<string, Color>();
+
+        // パスに基づいて色を取得するメソッド
+        public static Color GetColorFromPath(string path)
+        {
+            Color color; // C# 5ではここで変数を宣言する必要があります
+            if (pathColorMapping.TryGetValue(path, out color)) // C# 7以降の 'out var' 構文は使用できません
+            {
+                return color;
+            }
+            else
+            {
+                // マッピングが見つからない場合のデフォルト色
+                return Color.Black;
+            }
+        }
+
         public static string homeDirectory = @"C:"; // Home directory path
         public static string csvPath = @"D:\workspace\aaa.csv"; // Shortcut file path
         public static string myToolPath = @"D:\workspace\sss";
+        public static string dustBoxPath = @"DustBox";
         public static string myFont = "瀬戸フォント";
         public static string fileOpenExe = "code";
         public static int btnSizeWidth = 80;
@@ -21,12 +42,32 @@ namespace MD_Explorer
         public static int btnSizeFont = 8;
         public static int tabSizeFont = 13;
         public static int textSizeFont = 13;
-
+        public static int listSizeFont = 10;
+        public static Color btnBackColor = Color.FromArgb(45, 45, 45);
+        public static Color btnTextColor = Color.White;
+        public static Color tabBackColor = Color.FromArgb(45, 45, 45);
+        public static Color tabTextColor = Color.White;
+        public static Color labelBackColor = Color.Transparent;
+        public static Color labelTextColor = Color.White;
+        public static Color comboBoxBackColor = Color.FromArgb(45, 45, 45);
+        public static Color comboBoxTextColor = Color.White;
+        public static Color contxtBackColor = Color.FromArgb(45, 45, 45);
+        public static Color contxtTextColor = Color.White;
+        public static Color menuBackColor = Color.FromArgb(45, 45, 45);
+        public static Color menuTextColor = Color.White;
+        public static Color dropDownBackColor = Color.FromArgb(45, 45, 45);
+        public static Color dropDownTextColor = Color.White;
+        public static Color listBoxBackColor = Color.FromArgb(30, 30, 30);
+        public static Color listBoxTextColor = Color.White;
+        public static Color txtBackColor = Color.FromArgb(30, 30, 30);
+        public static Color txtTextColor = Color.White;
+        public static Color formBackColor = Color.FromArgb(20, 20, 20);
+        public static Color formTextColor = Color.White;
         public static void LoadSettings(string configFilePath)
         {
             if (!File.Exists(configFilePath))
             {
-                Console.WriteLine(string.Format("設定ファイル '{0}' が見つかりません。デフォルト設定を使用します。",configFilePath));
+                MessageBox.Show(string.Format("設定ファイル '{0}' が見つかりません。デフォルト設定を使用します。",configFilePath));
                 return;
             }
 
@@ -46,6 +87,7 @@ namespace MD_Explorer
             homeDirectory = appSettings["homeDirectory"] ?? homeDirectory;
             csvPath = appSettings["csvPath"] ?? csvPath;
             myToolPath = appSettings["myToolPath"] ?? myToolPath;
+            dustBoxPath = appSettings["dustBoxPath"] ?? dustBoxPath;
             myFont = appSettings["myFont"] ?? myFont;
             fileOpenExe = appSettings["fileOpenExe"] ?? fileOpenExe;
 
@@ -66,6 +108,49 @@ namespace MD_Explorer
 
             int textFont;
             textSizeFont = int.TryParse(appSettings["textSizeFont"], out textFont) ? textFont : textSizeFont;
+
+            int listFont;
+            listSizeFont = int.TryParse(appSettings["listSizeFont"], out listFont) ? listFont : listSizeFont;
+
+            btnBackColor = ColorTranslator.FromHtml(appSettings["btnBackColor"] ?? "#2D2D2D");
+            btnTextColor = ColorTranslator.FromHtml(appSettings["btnTextColor"] ?? "#FFFFFF");
+            tabBackColor = ColorTranslator.FromHtml(appSettings["tabBackColor"] ?? "#2D2D2D");
+            tabTextColor = ColorTranslator.FromHtml(appSettings["tabTextColor"] ?? "#FFFFFF");
+            labelBackColor = ColorTranslator.FromHtml(appSettings["labelBackColor"] ?? "#00000000");
+            labelTextColor = ColorTranslator.FromHtml(appSettings["labelTextColor"] ?? "#FFFFFF");
+            comboBoxBackColor = ColorTranslator.FromHtml(appSettings["comboBoxBackColor"] ?? "#2D2D2D");
+            comboBoxTextColor = ColorTranslator.FromHtml(appSettings["comboBoxTextColor"] ?? "#FFFFFF");
+            contxtBackColor = ColorTranslator.FromHtml(appSettings["contxtBackColor"] ?? "#2D2D2D");
+            contxtTextColor = ColorTranslator.FromHtml(appSettings["contxtTextColor"] ?? "#FFFFFF");
+            menuBackColor = ColorTranslator.FromHtml(appSettings["menuBackColor"] ?? "#2D2D2D");
+            menuTextColor = ColorTranslator.FromHtml(appSettings["menuTextColor"] ?? "#FFFFFF");
+            dropDownBackColor = ColorTranslator.FromHtml(appSettings["dropDownBackColor"] ?? "#2D2D2D");
+            dropDownTextColor = ColorTranslator.FromHtml(appSettings["dropDownTextColor"] ?? "#FFFFFF");
+            listBoxBackColor = ColorTranslator.FromHtml(appSettings["listBoxBackColor"] ?? "#1E1E1E");
+            listBoxTextColor = ColorTranslator.FromHtml(appSettings["listBoxTextColor"] ?? "#FFFFFF");
+            txtBackColor = ColorTranslator.FromHtml(appSettings["txtBackColor"] ?? "#1E1E1E");
+            txtTextColor = ColorTranslator.FromHtml(appSettings["txtTextColor"] ?? "#FFFFFF");
+            formBackColor = ColorTranslator.FromHtml(appSettings["formBackColor"] ?? "#141414");
+            formTextColor = ColorTranslator.FromHtml(appSettings["formTextColor"] ?? "#FFFFFF");
+
+            // パスと色のマッピングを読み込む
+            foreach (string key in appSettings.AllKeys)
+            {
+                if (key.StartsWith("/") || key.Contains(":")) // パスのキーを識別
+                {
+                    string colorValue = appSettings[key];
+                    Color color;
+                    try
+                    {
+                        color = ColorTranslator.FromHtml(colorValue);
+                    }
+                    catch
+                    {
+                        color = Color.Gray; // 無効なカラーコードの場合のデフォルト色
+                    }
+                    pathColorMapping[key] = color;
+                }
+            }
         }
     }
 
