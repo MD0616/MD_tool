@@ -135,6 +135,11 @@ namespace MD_Explorer
                 menuItemGetPath.ForeColor = GlobalSettings.menuTextColor;
                 menuItemGetPath.Click += eventCopyFullPath_Click;
 
+                ToolStripMenuItem menuItemSafeOpen = new ToolStripMenuItem("SafeOpen");
+                menuItemSafeOpen.BackColor = GlobalSettings.menuBackColor;
+                menuItemSafeOpen.ForeColor = GlobalSettings.menuTextColor;
+                menuItemSafeOpen.Click += eventSafeOpen_Click;
+
                 ToolStripMenuItem menuItemOpenVScode = new ToolStripMenuItem("VScodeで開く");
                 menuItemOpenVScode.BackColor = GlobalSettings.menuBackColor;
                 menuItemOpenVScode.ForeColor = GlobalSettings.menuTextColor;
@@ -145,6 +150,7 @@ namespace MD_Explorer
                 dropDownMenu.Items.Add(menuItemDelete);
                 dropDownMenu.Items.Add(menuItemGetFileName);
                 dropDownMenu.Items.Add(menuItemGetPath);
+                dropDownMenu.Items.Add(menuItemSafeOpen);
                 dropDownMenu.Items.Add(menuItemOpenVScode);
 
                 // KeyDownイベントハンドラを設定

@@ -13,12 +13,11 @@ namespace MD_Explorer
 {
     public static class Prompt
     {
-        public static string ShowDialog(string text, string caption)
-        {
+        public static string ShowDialog(string text, string caption, string defaultValue = "") {
             Form prompt = new Form()
             {
                 Width = 500,
-                Height = 200,
+                Height = 150,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 Text = caption,
                 StartPosition = FormStartPosition.CenterScreen,
@@ -27,9 +26,26 @@ namespace MD_Explorer
             };
 
             Label textLabel = new Label() { Left = 50, Top = 20, Text = text, AutoSize = true };
-            TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400, BackColor = GlobalSettings.txtTextColor, ForeColor = GlobalSettings.txtTextColor};
+            TextBox textBox = new TextBox() 
+            { 
+                Left = 50, 
+                Top = 50, 
+                Width = 400, 
+                BackColor = GlobalSettings.txtBackColor, 
+                ForeColor = GlobalSettings.txtTextColor,
+                Text = defaultValue // デフォルト値を設定
+            };
 
-            Button confirmation = new Button() { Text = "OK", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK, BackColor = GlobalSettings.btnBackColor, ForeColor = GlobalSettings.btnTextColor };
+            Button confirmation = new Button() 
+            { 
+                Text = "OK", 
+                Left = 350, 
+                Width = 100, 
+                Top = 80, 
+                DialogResult = DialogResult.OK, 
+                BackColor = GlobalSettings.btnBackColor, 
+                ForeColor = GlobalSettings.btnTextColor 
+            };
             confirmation.FlatStyle = FlatStyle.Flat;
 
             prompt.Controls.Add(textBox);
@@ -250,11 +266,12 @@ namespace MD_Explorer
                             case OperationTypeEnum.Move: // 修正された列挙型の名前を使用
                                 if (File.Exists(sourcePath))
                                 {
-                                    File.Move(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)));
+                                    File.Copy(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)));
+                                    File.Delete(sourcePath);
                                 }
                                 else if (Directory.Exists(sourcePath))
                                 {
-                                    Directory.Move(sourcePath, destinationPath);
+                                    CommonLibrary.MoveDirectory(sourcePath, destinationPath);
                                 }
                                 break;
                         }

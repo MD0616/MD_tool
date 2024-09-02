@@ -62,14 +62,14 @@ namespace MD_Explorer
                             // ファイルまたはディレクトリを移動
                             if (File.Exists(fullPath))
                             {
-                                File.Move(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
+                                File.Copy(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
+                                File.Delete(fullPath);
                             }
                             else if (Directory.Exists(fullPath))
                             {
-                                Directory.Move(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
+                                CommonLibrary.MoveDirectory(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
                             }
                         }
-
                     }
                 }
             }
@@ -92,7 +92,7 @@ namespace MD_Explorer
                     string fullPath = Path.Combine(path, itemName);
 
                     // 新しい名前を入力するためのダイアログを表示
-                    string newFileName= Prompt.ShowDialog(string.Format("変更前'{0}'\n新しい名前を記載してください",itemName), "リネーム");
+                    string newFileName = Prompt.ShowDialog(string.Format("変更前'{0}'\n新しい名前を記載してください", itemName), "リネーム", itemName);
 
                     if (!string.IsNullOrEmpty(newFileName))
                     {
@@ -101,11 +101,12 @@ namespace MD_Explorer
                         // ファイルまたはディレクトリの名前を変更
                         if (File.Exists(fullPath))
                         {
-                            File.Move(fullPath, newPath);
+                            File.Copy(fullPath, newPath);
+                            File.Delete(fullPath);
                         }
                         else if (Directory.Exists(fullPath))
                         {
-                            Directory.Move(fullPath, newPath);
+                            CommonLibrary.MoveDirectory(fullPath, newPath);
                         }
                     }
                 }
@@ -113,6 +114,7 @@ namespace MD_Explorer
                 RefreshActiveTab();
             }
         }
+
         private void eventCopyName_Click(object sender, EventArgs e)
         {
             // このメソッドは、名前コピーボタンがクリックされたときに呼び出されます。
@@ -131,6 +133,7 @@ namespace MD_Explorer
                 Clipboard.SetText(string.Join(Environment.NewLine, itemNames)); // クリップボードにコピー
             }
         }
+
         private void eventCopyFullPath_Click(object sender, EventArgs e)
         {
             // このメソッドは、フルパスコピーボタンがクリックされたときに呼び出されます。
@@ -149,6 +152,37 @@ namespace MD_Explorer
                     fullPaths.Add(fullPath);
                 }
                 Clipboard.SetText(string.Join(Environment.NewLine, fullPaths)); // クリップボードにコピー
+            }
+        }
+
+        private void eventSafeOpen_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab != null)
+            {
+                TabPage activeTab = tabControl1.SelectedTab;
+                ListBox listBox = (ListBox)activeTab.Controls[0];
+                List<string> itemNames = new List<string>();
+                for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
+                {
+                    string path = listBox.Tag.ToString();
+                    string selectedItem = listBox.SelectedItems[i].ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0];
+                    string fullPath = Path.Combine(path, itemName);
+
+                    if (!Directory.Exists(GlobalSettings.safeBoxPath))
+                    {
+                        Directory.CreateDirectory(GlobalSettings.safeBoxPath);
+                    }
+
+                    string absoluteSafeBoxPath = Path.Combine(GlobalSettings.safeBoxPath, itemName);
+                    MessageBox.Show(string.Format("設定ファイル '{0}' {1} ",absoluteSafeBoxPath,fullPath));
+
+                    if (File.Exists(fullPath))
+                    {
+                        File.Copy(fullPath,absoluteSafeBoxPath);
+                        Process.Start(absoluteSafeBoxPath);
+                    }
+                }
             }
         }
 

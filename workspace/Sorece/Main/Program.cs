@@ -18,22 +18,22 @@ namespace MD_Explorer
         // パスに基づいて色を取得するメソッド
         public static Color GetColorFromPath(string path)
         {
-            Color color; // C# 5ではここで変数を宣言する必要があります
-            if (pathColorMapping.TryGetValue(path, out color)) // C# 7以降の 'out var' 構文は使用できません
+            foreach (var pair in pathColorMapping)
             {
-                return color;
+                if (path.StartsWith(pair.Key)) // パスが指定したディレクトリを含むかどうかをチェック
+                {
+                    return pair.Value;
+                }
             }
-            else
-            {
-                // マッピングが見つからない場合のデフォルト色
-                return Color.Black;
-            }
+            // マッピングが見つからない場合のデフォルト色
+            return Color.Black;
         }
 
         public static string homeDirectory = @"C:"; // Home directory path
         public static string csvPath = @"D:\workspace\aaa.csv"; // Shortcut file path
         public static string myToolPath = @"D:\workspace\sss";
         public static string dustBoxPath = @"DustBox";
+        public static string safeBoxPath = @"SafeBox";
         public static string myFont = "瀬戸フォント";
         public static string fileOpenExe = "code";
         public static int btnSizeWidth = 80;
@@ -88,6 +88,7 @@ namespace MD_Explorer
             csvPath = appSettings["csvPath"] ?? csvPath;
             myToolPath = appSettings["myToolPath"] ?? myToolPath;
             dustBoxPath = appSettings["dustBoxPath"] ?? dustBoxPath;
+            safeBoxPath = appSettings["safeBoxPath"] ?? safeBoxPath;
             myFont = appSettings["myFont"] ?? myFont;
             fileOpenExe = appSettings["fileOpenExe"] ?? fileOpenExe;
 
@@ -151,6 +152,32 @@ namespace MD_Explorer
                     pathColorMapping[key] = color;
                 }
             }
+        }
+    }
+
+    static class CommonLibrary
+    {
+        public static void MoveDirectory(string sourcePath, string destinationPath)
+        {
+            // 移動先のディレクトリを作成
+            Directory.CreateDirectory(destinationPath);
+
+            // ソースディレクトリ内のすべてのファイルをコピー
+            foreach (string file in Directory.GetFiles(sourcePath))
+            {
+                string destFile = Path.Combine(destinationPath, Path.GetFileName(file));
+                File.Copy(file, destFile);
+            }
+
+            // ソースディレクトリ内のすべてのサブディレクトリを再帰的にコピー
+            foreach (string dir in Directory.GetDirectories(sourcePath))
+            {
+                string destDir = Path.Combine(destinationPath, Path.GetFileName(dir));
+                MoveDirectory(dir, destDir);
+            }
+
+            // 元のディレクトリを削除
+            Directory.Delete(sourcePath, true);
         }
     }
 

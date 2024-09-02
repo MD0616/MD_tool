@@ -134,7 +134,7 @@ namespace MD_Explorer
                 if (listBox.Tag != null)
                 {
                     string path = listBox.Tag.ToString(); // 現在のパスを取得
-                    string fileName = Prompt.ShowDialog("新規ファイル名を入力してください", "新規ファイル作成");
+                    string fileName = Prompt.ShowDialog("新規ファイル名を入力してください", "新規ファイル作成", "");
                     if (!string.IsNullOrEmpty(fileName))
                     {
                         string fullPath = Path.Combine(path, fileName);
@@ -157,7 +157,7 @@ namespace MD_Explorer
                 if (listBox.Tag != null)
                 {
                     string path = listBox.Tag.ToString(); // 現在のパスを取得
-                    string folderName = Prompt.ShowDialog("新規フォルダ名を入力してください", "新規フォルダ作成");
+                    string folderName = Prompt.ShowDialog("新規フォルダ名を入力してください", "新規フォルダ作成", "");
                     if (!string.IsNullOrEmpty(folderName))
                     {
                         string fullPath = Path.Combine(path, folderName);
