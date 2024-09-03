@@ -208,7 +208,7 @@ namespace MD_Explorer
             // ファイルをコピー
             foreach (string filePath in Directory.GetFiles(sourceDirPath, "*.*", SearchOption.AllDirectories))
             {
-                File.Copy(filePath, filePath.Replace(sourceDirPath, destinationDirPath), true);
+                CommonLibrary.CopyFile(filePath, filePath.Replace(sourceDirPath, destinationDirPath));
             }
         }
 
@@ -256,7 +256,7 @@ namespace MD_Explorer
                             case OperationTypeEnum.Copy: // 修正された列挙型の名前を使用
                                 if (File.Exists(sourcePath))
                                 {
-                                    File.Copy(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)), true);
+                                    CommonLibrary.CopyFile(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)));
                                 }
                                 else if (Directory.Exists(sourcePath))
                                 {
@@ -266,7 +266,7 @@ namespace MD_Explorer
                             case OperationTypeEnum.Move: // 修正された列挙型の名前を使用
                                 if (File.Exists(sourcePath))
                                 {
-                                    File.Copy(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)));
+                                    CommonLibrary.CopyFile(sourcePath, Path.Combine(destinationPath, Path.GetFileName(sourcePath)));
                                     File.Delete(sourcePath);
                                 }
                                 else if (Directory.Exists(sourcePath))

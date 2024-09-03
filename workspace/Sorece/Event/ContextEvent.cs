@@ -62,7 +62,7 @@ namespace MD_Explorer
                             // ファイルまたはディレクトリを移動
                             if (File.Exists(fullPath))
                             {
-                                File.Copy(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
+                                CommonLibrary.CopyFile(fullPath, Path.Combine(absoluteDustBoxPath, itemName));
                                 File.Delete(fullPath);
                             }
                             else if (Directory.Exists(fullPath))
@@ -101,7 +101,7 @@ namespace MD_Explorer
                         // ファイルまたはディレクトリの名前を変更
                         if (File.Exists(fullPath))
                         {
-                            File.Copy(fullPath, newPath);
+                            CommonLibrary.CopyFile(fullPath, newPath);
                             File.Delete(fullPath);
                         }
                         else if (Directory.Exists(fullPath))
@@ -179,8 +179,20 @@ namespace MD_Explorer
 
                     if (File.Exists(fullPath))
                     {
-                        File.Copy(fullPath,absoluteSafeBoxPath);
-                        Process.Start(absoluteSafeBoxPath);
+                        CommonLibrary.CopyFile(fullPath, absoluteSafeBoxPath);
+                        Process process = Process.Start(absoluteSafeBoxPath);
+                        process.EnableRaisingEvents = true;
+                        process.Exited += (s, args) =>
+                        {
+                            try
+                            {
+                                File.Delete(absoluteSafeBoxPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("ファイルの削除中にエラーが発生しました: " + ex.Message);
+                            }
+                        };
                     }
                 }
             }

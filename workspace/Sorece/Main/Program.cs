@@ -6,7 +6,8 @@ using System.Xml; // XmlDocument と XmlNodeList のため
 using System.Collections.Specialized; // NameValueCollection のため
 using System.Drawing;
 using System.Collections.Generic;
-// Color[] tabColors = { Color.Black, Color.Red, Color.Blue, Color.Green, Color.Brown, Color.Purple, Color.Pink, Color.Turquoise, Color.Orange };
+using System.Linq;
+
 namespace MD_Explorer
 {
     // Static class to hold global-like variables
@@ -137,7 +138,7 @@ namespace MD_Explorer
             // パスと色のマッピングを読み込む
             foreach (string key in appSettings.AllKeys)
             {
-                if (key.StartsWith("/") || key.Contains(":")) // パスのキーを識別
+                if (key.StartsWith("\\") || key.Contains(":")) // パスのキーを識別
                 {
                     string colorValue = appSettings[key];
                     Color color;
@@ -157,16 +158,57 @@ namespace MD_Explorer
 
     static class CommonLibrary
     {
+        public static void CopyFile(string sourcePath, string destinationPath)
+        {
+            if (File.Exists(destinationPath))
+            {
+                string message = string.Format("ファイル '{0}' は既に存在します。上書きしてよろしいですか？", destinationPath);
+                DialogResult result = MessageBox.Show(message, "上書き確認", MessageBoxButtons.YesNo);
+                if (result == DialogResult.No)
+                {
+                    return;
+                }
+            }
+            File.Copy(sourcePath, destinationPath, true);
+            return;
+        }
+
         public static void MoveDirectory(string sourcePath, string destinationPath)
         {
+            string folderName = Path.GetFileName(sourcePath.TrimEnd(Path.DirectorySeparatorChar));
+            destinationPath = Path.Combine(destinationPath, folderName);
+
             // 移動先のディレクトリを作成
             Directory.CreateDirectory(destinationPath);
+
+            List<string> filesToOverwrite = new List<string>();
+
+            // ソースディレクトリ内のすべてのファイルをチェック
+            foreach (string file in Directory.GetFiles(sourcePath))
+            {
+                string destFile = Path.Combine(destinationPath, Path.GetFileName(file));
+                if (File.Exists(destFile))
+                {
+                    filesToOverwrite.Add(destFile);
+                }
+            }
+
+            // 上書き確認のダイアログを表示
+            if (filesToOverwrite.Any())
+            {
+                string message = "以下のファイルが既に存在します。上書きしてよろしいですか？\n" + string.Join("\n", filesToOverwrite);
+                DialogResult result = MessageBox.Show(message, "上書き確認", MessageBoxButtons.YesNo);
+                if (result == DialogResult.No)
+                {
+                    return;
+                }
+            }
 
             // ソースディレクトリ内のすべてのファイルをコピー
             foreach (string file in Directory.GetFiles(sourcePath))
             {
                 string destFile = Path.Combine(destinationPath, Path.GetFileName(file));
-                File.Copy(file, destFile);
+                CopyFile(file, destFile);
             }
 
             // ソースディレクトリ内のすべてのサブディレクトリを再帰的にコピー
