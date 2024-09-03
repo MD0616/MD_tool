@@ -175,9 +175,6 @@ namespace MD_Explorer
 
         public static void MoveDirectory(string sourcePath, string destinationPath)
         {
-            string folderName = Path.GetFileName(sourcePath.TrimEnd(Path.DirectorySeparatorChar));
-            destinationPath = Path.Combine(destinationPath, folderName);
-
             // 移動先のディレクトリを作成
             Directory.CreateDirectory(destinationPath);
 
@@ -196,7 +193,13 @@ namespace MD_Explorer
             // 上書き確認のダイアログを表示
             if (filesToOverwrite.Any())
             {
-                string message = "以下のファイルが既に存在します。上書きしてよろしいですか？\n" + string.Join("\n", filesToOverwrite);
+                int maxFilesToShow = 10; // 表示するファイルの最大数
+                string message = "以下のファイルが既に存在します。上書きしてよろしいですか？\n" 
+                                + string.Join("\n", filesToOverwrite.Take(maxFilesToShow));
+                if (filesToOverwrite.Count > maxFilesToShow)
+                {
+                    message += string.Format("\n...and {0} more files.", filesToOverwrite.Count - maxFilesToShow);
+                }
                 DialogResult result = MessageBox.Show(message, "上書き確認", MessageBoxButtons.YesNo);
                 if (result == DialogResult.No)
                 {
@@ -208,7 +211,7 @@ namespace MD_Explorer
             foreach (string file in Directory.GetFiles(sourcePath))
             {
                 string destFile = Path.Combine(destinationPath, Path.GetFileName(file));
-                CopyFile(file, destFile);
+                File.Copy(file, destFile, true);
             }
 
             // ソースディレクトリ内のすべてのサブディレクトリを再帰的にコピー
