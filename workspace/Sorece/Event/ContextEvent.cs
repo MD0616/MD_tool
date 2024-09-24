@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace MD_Explorer
 {
@@ -202,6 +203,71 @@ namespace MD_Explorer
         {
             // 現在選択されているアイテムをVSCodeで開きます。
             OpenSelectedItemWith("code");
+        }
+
+        private void eventDuplicate_Click(object sender, EventArgs e)
+        {
+            // 現在選択されているタブがある場合、そのタブの現在選択されているアイテムの名前を取得します。
+            if (tabControl1.SelectedTab != null)
+            {
+                TabPage activeTab = tabControl1.SelectedTab;
+                ListBox listBox = (ListBox)activeTab.Controls[0];
+                for (int i = listBox.SelectedItems.Count - 1; i >= 0; i--)
+                {
+                    string path = listBox.Tag.ToString();
+                    string selectedItem = listBox.SelectedItems[i].ToString().Split(new[] { ": " }, StringSplitOptions.None)[1];
+                    string itemName = selectedItem.Split(new[] { "  " }, StringSplitOptions.None)[0]; // アイテム名のみを取得
+                    string fullPath = Path.Combine(path, itemName);
+
+                    // 新しい名前を入力するためのダイアログを表示
+                    string newFileName = Prompt.ShowDialog(string.Format("複製元'{0}'\n新しい名前を記載してください", itemName), "複製", itemName);
+
+                    if (!string.IsNullOrEmpty(newFileName))
+                    {
+                        string newPath = Path.Combine(path, newFileName);
+
+                        // ファイルまたはディレクトリを複製
+                        if (File.Exists(fullPath))
+                        {
+                            // ファイルの複製処理
+                            CommonLibrary.CopyFile(fullPath, newPath);
+                        }
+                        else if (Directory.Exists(fullPath))
+                        {
+                            // フォルダの複製処理（再帰的にコピー）
+                            CopyDirectoryRecursive(fullPath, newPath);
+                        }
+                    }
+                }
+                // リストを更新する。
+                RefreshActiveTab();
+            }
+        }
+
+        // 再帰的にディレクトリをコピーするメソッド
+        private void CopyDirectoryRecursive(string sourceDir, string targetDir)
+        {
+            // ターゲットディレクトリが存在しない場合は作成
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
+
+            // ファイルをコピー
+            foreach (string filePath in Directory.GetFiles(sourceDir))
+            {
+                string fileName = Path.GetFileName(filePath);
+                string targetFilePath = Path.Combine(targetDir, fileName);
+                CommonLibrary.CopyFile(filePath, targetFilePath); // ファイルのコピー処理
+            }
+
+            // サブディレクトリを再帰的にコピー
+            foreach (string dirPath in Directory.GetDirectories(sourceDir))
+            {
+                string dirName = Path.GetFileName(dirPath);
+                string targetDirPath = Path.Combine(targetDir, dirName);
+                CopyDirectoryRecursive(dirPath, targetDirPath);
+            }
         }
     }
 }

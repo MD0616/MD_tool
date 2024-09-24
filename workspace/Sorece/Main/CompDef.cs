@@ -149,18 +149,21 @@ namespace MD_Explorer
                 Text = "キャンセル",
                 BackColor = GlobalSettings.btnBackColor,
                 ForeColor = GlobalSettings.btnTextColor,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
             };
             btnCopy = new Button
             {
                 Text = "コピー",
                 BackColor = GlobalSettings.btnBackColor,
                 ForeColor = GlobalSettings.btnTextColor,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
             };
             btnMove = new Button
             {
                 Text = "移動",
                 BackColor = GlobalSettings.btnBackColor,
                 ForeColor = GlobalSettings.btnTextColor,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont), // 文字サイズを大きくする
             };
 
             // ボタンをパネルに追加
@@ -356,7 +359,14 @@ namespace MD_Explorer
     public class TabData
     {
         public string Path { get; set; }
-        public Rectangle CloseButton { get; set; } // 閉じるボタンの矩形を追加
+        public Rectangle CloseButton { get; set; } // 閉じるボタンの矩形
+        public Stack<string> History { get; set; }
+
+        // コンストラクタでプロパティを初期化
+        public TabData()
+        {
+            History = new Stack<string>(); // 履歴を初期化
+        }
     }
 
     // スクリプトの情報を保持するクラス

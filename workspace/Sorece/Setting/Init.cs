@@ -145,6 +145,11 @@ namespace MD_Explorer
                 menuItemOpenVScode.ForeColor = GlobalSettings.menuTextColor;
                 menuItemOpenVScode.Click += eventVSCode_Click;
 
+                ToolStripMenuItem menuItemDuplicate = new ToolStripMenuItem("複製");
+                menuItemDuplicate.BackColor = GlobalSettings.menuBackColor;
+                menuItemDuplicate.ForeColor = GlobalSettings.menuTextColor;
+                menuItemDuplicate.Click += eventDuplicate_Click;
+
                 // アイテムをコンテキストメニューに追加
                 dropDownMenu.Items.Add(menuItemRename);
                 dropDownMenu.Items.Add(menuItemDelete);
@@ -152,6 +157,7 @@ namespace MD_Explorer
                 dropDownMenu.Items.Add(menuItemGetPath);
                 dropDownMenu.Items.Add(menuItemSafeOpen);
                 dropDownMenu.Items.Add(menuItemOpenVScode);
+                dropDownMenu.Items.Add(menuItemDuplicate);
 
                 // KeyDownイベントハンドラを設定
                 dropDownMenu.KeyDown += dropDownMenu_KeyDown;
@@ -191,6 +197,11 @@ namespace MD_Explorer
                 Font = new Font(GlobalSettings.myFont, GlobalSettings.textSizeFont), // 文字サイズを大きくする
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, // ウィンドウのサイズに合わせて伸縮
             };
+
+            // プレースホルダー設定
+            txtSearchBar.Enter += (sender, e) => ClearSearchBarPlaceholder();
+            txtSearchBar.Leave += (sender, e) => SetSearchBarPlaceholder();
+
             txtSearchBar.KeyDown += new KeyEventHandler(btn_KeyDown);
 
             // 実行ボタンの初期化
@@ -320,6 +331,8 @@ namespace MD_Explorer
             // イベントハンドラの設定
             tabControl1.DrawItem += new DrawItemEventHandler(tabControl1_DrawItem);
             tabControl1.MouseDown += new MouseEventHandler(tabControl1_MouseDown);
+            // タブ切り替えイベントを設定
+            tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 
             // 現在ディレクトリのフルパスをクリップボードに追加するボタン
             btnCopyPath = new Button
@@ -376,6 +389,19 @@ namespace MD_Explorer
             };
             btnCopyMove.Click += btnCopyMove_Click;
 
+            btnSearchFiles = new Button
+            {
+                Text = "SearchFile",
+                Name = "SearchFile",
+                BackColor = GlobalSettings.btnBackColor,
+                ForeColor = GlobalSettings.btnTextColor,
+                Width = GlobalSettings.btnSizeWidth,
+                Height = GlobalSettings.btnSizeHeight,
+                Font = new Font(GlobalSettings.myFont, GlobalSettings.btnSizeFont),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left
+            };
+            btnSearchFiles.Click += btnSearchFiles_Click;
+
             // FlowLayoutPanelの初期化（ホーム、更新ボタン用）
             FlowLayoutPanel topPanel = new FlowLayoutPanel
             {
@@ -428,6 +454,7 @@ namespace MD_Explorer
             bottomPanel.Controls.Add(btnNewFolder);
             bottomPanel.Controls.Add(btnCopyMove);
             bottomPanel.Controls.Add(btnShortcut);
+            bottomPanel.Controls.Add(btnSearchFiles);
 
             // 検索バーと決定ボタンをTableLayoutPanelに追加
             tableLayoutPanel.Controls.Add(txtSearchBar, 0, 0);

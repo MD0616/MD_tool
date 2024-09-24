@@ -175,5 +175,13 @@ namespace MD_Explorer
             CopyMoveForm copyMoveForm = new CopyMoveForm();
             copyMoveForm.Show();
         }
+
+        // Search Filesボタンのクリックイベントハンドラ
+        private void btnSearchFiles_Click(object sender, EventArgs e)
+        {
+            // 検索フォームを表示
+            SearchForm searchForm = new SearchForm();
+            searchForm.Show();
+        }
     }
 }

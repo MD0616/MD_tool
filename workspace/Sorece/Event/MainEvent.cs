@@ -70,12 +70,21 @@ namespace MD_Explorer
 
         private string GetCurrentTabDirectory()
         {
-            // 現在のアクティブタブのディレクトリを取得
-            var tabData = (TabData)tabControl1.SelectedTab.Tag;
-            string directoryPath = tabData.Path;
-            return directoryPath;
-        }
+            if (tabControl1.SelectedTab == null || tabControl1.SelectedTab.Tag == null)
+            {
+                // タブが選択されていない場合やデータがない場合にデフォルトメッセージを返す
+                return "ディレクトリが選択されていません";
+            }
 
+            var tabData = tabControl1.SelectedTab.Tag as TabData;
+            if (tabData != null)
+            {
+                return tabData.Path;
+            }
+
+            // タブデータがnullの場合にもデフォルトメッセージを返す
+            return "ディレクトリが選択されていません";
+        }
 
         private void UpdateActiveTab(string path)
         {
@@ -141,12 +150,8 @@ namespace MD_Explorer
                 }
             }
         }
-
         public void OpenNewTab(string path)
         {
-            // このメソッドは、指定されたパスで新しいタブを開きます。
-            // パスのアクセス権限を確認し、新しいタブとリストボックスを作成します。
-            // リストボックスのタグに現在のパスを設定し、タブをタブコントロールに追加します。
             if (!HasAccessPermission(path))
             {
                 MessageBox.Show("指定されたパスにアクセスする権限がありません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -160,16 +165,20 @@ namespace MD_Explorer
                 ForeColor = Color.White,
             };
 
+            // リストボックス作成
             ListBox listBox = CreateListBox(path, tabPage);
             listBox.Tag = path;
-
             tabPage.Controls.Add(listBox);
-            // ネットワークのインデックスをタブのTagプロパティに保存
+
+            // TabDataに履歴を初期化して設定
             tabPage.Tag = new TabData
             {
                 Path = path,
-                CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
+                CloseButton = new Rectangle(),
+                History = new Stack<string>()  // 履歴の初期化
             };
+
+            // タブを追加
             tabControl1.TabPages.Add(tabPage);
         }
 
@@ -202,30 +211,54 @@ namespace MD_Explorer
 
         private void UpdateListBox(ListBox listBox, string path, TabPage tabPage)
         {
-            // このメソッドは、指定されたパスでリストボックスを更新します。
-            // パスのアクセス権限を確認し、ディレクトリ、ファイル、リンクをリストボックスに追加します。
-            // リストボックスのタグに現在のパスを設定し、タブのテキストを現在のディレクトリ名に設定します。
             if (!HasAccessPermission(path))
             {
                 MessageBox.Show("指定されたパスにアクセスする権限がありません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
+            // タブにTagが存在しない場合は新しく作成
+            if (tabPage.Tag == null)
+            {
+                tabPage.Tag = new TabData();
+            }
+
+            // タブのTagからTabDataを取得
+            var tabData = (TabData)tabPage.Tag;
+
+            // 現在のパスを履歴に保存
+            if (listBox.Tag != null && path != (string)listBox.Tag && tabData.History != null)
+            {
+                tabData.History.Push(listBox.Tag.ToString());
+            }
+
+            // 新しいパスをTabDataに更新
+            tabData.Path = path;
+
             listBox.Items.Clear();
+
+            // 戻るアイテムを追加 (履歴が存在する場合のみ)
+            if (tabData.History != null && tabData.History.Count > 0)
+            {
+                listBox.Items.Add("← 戻る"); // リストの一番上に戻るボタンを追加
+            }
+
             DirectoryInfo parentDir = Directory.GetParent(path);
             if (parentDir != null)
             {
-                listBox.Items.Add("ひとつ前に戻る");
+                listBox.Items.Add("親パスへ");
             }
+
             foreach (string dir in Directory.GetDirectories(path))
             {
                 DirectoryInfo info = new DirectoryInfo(dir);
                 string lastModified = info.LastWriteTime.ToString("yyyy/MM/dd HH:mm");
                 listBox.Items.Add(FormatString("Dir ", Path.GetFileName(dir), "-", lastModified));
             }
+
             foreach (string file in Directory.GetFiles(path))
             {
-                if (!file.EndsWith(".lnk")) // .lnkファイルは除外
+                if (!file.EndsWith(".lnk"))
                 {
                     FileInfo info = new FileInfo(file);
                     string size = (info.Length / 1024).ToString() + " KB";
@@ -233,20 +266,17 @@ namespace MD_Explorer
                     listBox.Items.Add(FormatString("File", Path.GetFileName(file), size, lastModified));
                 }
             }
+
             foreach (string link in Directory.GetFiles(path, "*.lnk"))
             {
                 listBox.Items.Add(FormatString("Link", Path.GetFileName(link), "-", "-"));
             }
 
-            // ネットワークのインデックスを再計算し、タブのTagプロパティに保存
-            tabPage.Tag = new TabData
-            {
-                Path = path,
-                CloseButton = new Rectangle() // 閉じるボタンの矩形を初期化
-            };
-
             tabPage.Text = new DirectoryInfo(path).Name;
             listBox.Tag = path;
+
+            // フォルダ変更後にプレースホルダーを更新
+            SetSearchBarPlaceholder();
         }
 
         private string FormatString(string type, string name, string size, string lastModified)
@@ -260,5 +290,55 @@ namespace MD_Explorer
             return string.Format("[{0}]: {1}{2} サイズ: {3,-12} 更新日時: {4}", type, name, new string(' ', padding), size, lastModified);
         }
 
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab != null)
+            {
+                TabPage activeTab = tabControl1.SelectedTab;
+                var tabData = (TabData)activeTab.Tag;
+
+                // 戻る履歴が存在する場合
+                if (tabData.History != null && tabData.History.Count > 0)
+                {
+                    string previousPath = tabData.History.Pop(); // 履歴から前のパスを取得
+                    ListBox listBox = (ListBox)activeTab.Controls[0];
+                    UpdateListBox(listBox, previousPath, activeTab); // リストを更新
+                }
+                else
+                {
+                    MessageBox.Show("これ以上戻れません。", "戻る", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        // プレースホルダー機能の実装
+        private void SetSearchBarPlaceholder()
+        {
+            if (txtSearchBar == null) return;
+
+            string currentDir = GetCurrentTabDirectory();
+
+            // プレースホルダーの設定（入力がない場合のみ）
+            if (string.IsNullOrEmpty(txtSearchBar.Text) || txtSearchBar.ForeColor == Color.Gray)
+            {
+                txtSearchBar.ForeColor = Color.Gray; // プレースホルダーの色
+                txtSearchBar.Text = string.Format("PWD: {0}", currentDir);
+            }
+        }
+
+        private void ClearSearchBarPlaceholder()
+        {
+            if (txtSearchBar.ForeColor == Color.Gray)
+            {
+                txtSearchBar.Text = "";
+                txtSearchBar.ForeColor = GlobalSettings.btnTextColor; // 元の色に戻す
+            }
+        }
+
+        // タブが変更されたときに呼び出されるイベント
+        private void TabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetSearchBarPlaceholder();
+        }
     }
 }

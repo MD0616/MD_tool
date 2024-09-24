@@ -33,13 +33,21 @@ namespace MD_Explorer
         private ContextMenuStrip contextMenu;
         private ContextMenuStrip dropDownMenu;
         private Button btnCopyMove;
+        private Button btnSearchFiles;
 
         // MainFormクラスのコンストラクタ。オブジェクトが生成されるときに呼び出されます。
         public MainForm()
         {
             KeyPreview = true; // フォームがキーイベントを受け取るように設定
             KeyDown += new KeyEventHandler(MainForm_KeyDown);
-            InitializeComponent(); // フォーム上のコントロールの初期化を行います。このメソッドはデザイナによって自動的に生成されます。
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error during initialization: " + ex.Message + "\n" + ex.StackTrace);
+            }
             Icon = new Icon(@"Icon\MD_Explorer.ico");
         }
 

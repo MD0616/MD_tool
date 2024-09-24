@@ -130,11 +130,21 @@ namespace MD_Explorer
 
         private void HandleDoubleClick(string selectedPath, string path, ListBox listBox, TabPage tabPage)
         {
-            // このメソッドは、リストボックスのアイテムがダブルクリックされたときに呼び出されます。
-            // 選択されたアイテムがディレクトリを指している場合、そのディレクトリを開きます。
-            // 選択されたアイテムがファイルを指している場合、そのファイルをVSCodeで開きます。
-            if (selectedPath == "ひとつ前に戻る")
+            // タブデータを取得
+            var tabData = (TabData)tabPage.Tag;
+
+            // 「← 戻る」が選択された場合、履歴に基づいて前のディレクトリに戻る
+            if (selectedPath == "← 戻る")
             {
+                if (tabData.History != null && tabData.History.Count > 0)
+                {
+                    string previousPath = tabData.History.Pop();
+                    UpdateListBox(listBox, previousPath, tabPage);
+                }
+            }
+            else if (selectedPath == "親パスへ")
+            {
+                // 親パスへ
                 DirectoryInfo parentDir = Directory.GetParent(path);
                 if (parentDir != null)
                 {
@@ -220,7 +230,7 @@ namespace MD_Explorer
                 {
                     string selectedPath = listBox.SelectedItems[i].ToString();
                     string path = listBox.Tag.ToString();
-                    if (selectedPath == "ひとつ前に戻る")
+                    if (selectedPath == "親パスへ")
                     {
                         DirectoryInfo parentDir = Directory.GetParent(path);
                         if (parentDir != null)
@@ -283,8 +293,8 @@ namespace MD_Explorer
                     }
                 }
             }
-        // 選択個数を表示するラベルを更新
-        labelSelectedCount.Text = String.Format("選択された項目数: {0}", listBox.SelectedItems.Count);
+            // 選択個数を表示するラベルを更新
+            labelSelectedCount.Text = String.Format("選択された項目数: {0}", listBox.SelectedItems.Count);
         }
     }
 }
